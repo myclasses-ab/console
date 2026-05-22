@@ -30,7 +30,7 @@ This is a **standalone Vite + React 19 + TypeScript** app. It lives in its own d
 
 ## Backend Context (CRITICAL — Read Before Building)
 
-The backend is a **Spring Boot 4.0.5** app at `http://https://orca-app-s8tpj.ondigitalocean.app//api`.
+The backend is a **Spring Boot 4.0.5** app at `http://https://orca-app-s8tpj.ondigitalocean.app/api`.
 
 ### Authentication Status
 
@@ -65,7 +65,7 @@ Every controller follows this exact pattern:
 
 ### Axios Setup
 
-The console app uses a shared axios instance pointing to `http://https://orca-app-s8tpj.ondigitalocean.app//api` with:
+The console app uses a shared axios instance pointing to `http://https://orca-app-s8tpj.ondigitalocean.app/api` with:
 
 - `Authorization: Bearer <token>` header from `localStorage.getItem('authToken')`
 - 401 handler that redirects to `/login`
@@ -508,7 +508,7 @@ institute-console/
 ## Environment Variables
 
 ```env
-VITE_API_URL=http://https://orca-app-s8tpj.ondigitalocean.app//api
+VITE_API_URL=http://https://orca-app-s8tpj.ondigitalocean.app/api
 ```
 
 ---
