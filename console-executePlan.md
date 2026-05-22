@@ -1,6 +1,7 @@
 # Institute Console App — Build Prompt
 
 ## Goal
+
 Build a separate **Institute Console / Admin Dashboard** app where coaching institutes can log in and manage everything related to their institute profile, branches, courses, faculty, results, reviews, inquiries, media, and more.
 
 This is a **standalone Vite + React 19 + TypeScript** app. It lives in its own directory, separate from the existing Next.js frontend.
@@ -9,30 +10,32 @@ This is a **standalone Vite + React 19 + TypeScript** app. It lives in its own d
 
 ## Tech Stack
 
-| Layer | Technology |
-|-------|------------|
-| Build Tool | Vite 6 |
-| Framework | React 19 |
-| Language | TypeScript 5 |
-| Styling | Tailwind CSS 4 |
-| UI Components | shadcn/ui (or Radix UI primitives) |
-| Icons | lucide-react |
-| State Management | Zustand |
-| HTTP Client | Axios |
-| Routing | React Router v7 |
-| Forms | React Hook Form + Zod |
-| Charts | Recharts (for analytics) |
-| Toast Notifications | sonner |
-| Tables | TanStack Table (for lists) |
+| Layer               | Technology                         |
+| ------------------- | ---------------------------------- |
+| Build Tool          | Vite 6                             |
+| Framework           | React 19                           |
+| Language            | TypeScript 5                       |
+| Styling             | Tailwind CSS 4                     |
+| UI Components       | shadcn/ui (or Radix UI primitives) |
+| Icons               | lucide-react                       |
+| State Management    | Zustand                            |
+| HTTP Client         | Axios                              |
+| Routing             | React Router v7                    |
+| Forms               | React Hook Form + Zod              |
+| Charts              | Recharts (for analytics)           |
+| Toast Notifications | sonner                             |
+| Tables              | TanStack Table (for lists)         |
 
 ---
 
 ## Backend Context (CRITICAL — Read Before Building)
 
-The backend is a **Spring Boot 4.0.5** app at `http://localhost:8080/api`.
+The backend is a **Spring Boot 4.0.5** app at `http://https://orca-app-s8tpj.ondigitalocean.app//api`.
 
 ### Authentication Status
+
 **THERE IS NO AUTH SYSTEM YET.** The backend has:
+
 - NO Spring Security
 - NO JWT
 - NO login/register endpoints
@@ -49,7 +52,9 @@ The backend is a **Spring Boot 4.0.5** app at `http://localhost:8080/api`.
 6. The existing `UserInstituteAssociation` entity links users to institutes with roles (`OWNER`, `ADMIN`, `STAFF`). Use this to determine which institute(s) the logged-in user can manage.
 
 ### Existing API Patterns
+
 Every controller follows this exact pattern:
+
 - `POST /` — Create
 - `POST /bulk` — Bulk create
 - `GET /{identifier}` — Get by ID
@@ -59,7 +64,9 @@ Every controller follows this exact pattern:
 **NO PUT/UPDATE ENDPOINTS EXIST.** You must add `PUT /{identifier}` endpoints to EVERY controller that the console needs to update. The console is primarily an UPDATE tool.
 
 ### Axios Setup
-The console app uses a shared axios instance pointing to `http://localhost:8080/api` with:
+
+The console app uses a shared axios instance pointing to `http://https://orca-app-s8tpj.ondigitalocean.app//api` with:
+
 - `Authorization: Bearer <token>` header from `localStorage.getItem('authToken')`
 - 401 handler that redirects to `/login`
 
@@ -70,6 +77,7 @@ The console app uses a shared axios instance pointing to `http://localhost:8080/
 ### Phase 1: Foundation (Auth + Layout)
 
 **Login Page**
+
 - Clean, centered login form
 - Email + password fields
 - "Remember me" checkbox (stores token in localStorage)
@@ -77,6 +85,7 @@ The console app uses a shared axios instance pointing to `http://localhost:8080/
 - Beautiful gradient background, subtle animations
 
 **App Shell / Layout**
+
 - Collapsible sidebar navigation on desktop
 - Bottom tab bar on mobile
 - Top header with:
@@ -87,6 +96,7 @@ The console app uses a shared axios instance pointing to `http://localhost:8080/
 - Page transition animations (Framer Motion)
 
 **Sidebar Navigation Items:**
+
 1. Dashboard (home icon)
 2. Institute Profile (building icon)
 3. Branches (map-pin icon)
@@ -94,13 +104,13 @@ The console app uses a shared axios instance pointing to `http://localhost:8080/
 5. Batches (calendar icon)
 6. Faculty (users icon)
 7. Results & Awards (trophy icon)
-9. Reviews & Responses (message-square icon)
-10. Inquiries / Leads (mail icon)
-11. Media Gallery (image icon)
-12. FAQs (help-circle icon)
-13. Facilities (shield icon)
-14. Subscription (credit-card icon)
-15. Settings (settings icon)
+8. Reviews & Responses (message-square icon)
+9. Inquiries / Leads (mail icon)
+10. Media Gallery (image icon)
+11. FAQs (help-circle icon)
+12. Facilities (shield icon)
+13. Subscription (credit-card icon)
+14. Settings (settings icon)
 
 ---
 
@@ -118,6 +128,7 @@ The console app uses a shared axios instance pointing to `http://localhost:8080/
 ### Phase 3: Institute Profile
 
 A beautiful form to edit ALL Institute fields:
+
 - **Basic Info**: Name, Tagline, Short Description, Description, Founded Year
 - **Contact**: Email, Phone Primary, Phone Secondary, WhatsApp
 - **Type**: Institute Type (Offline/Online/Hybrid dropdown), Ownership Type
@@ -208,11 +219,13 @@ A beautiful form to edit ALL Institute fields:
 ### Phase 8: Results & Awards
 
 **Results Tab:**
+
 - List of student results with student name, exam, year, rank/score
 - Add Result form with all Result fields
 - Mark as Featured / Verified toggles
 
 **Awards Tab:**
+
 - List of awards with title, issuing body, year
 - Add Award form with all AwardAndRecognition fields
 - Upload certificate URL
@@ -303,9 +316,11 @@ A beautiful form to edit ALL Institute fields:
 ## Data Architecture
 
 ### Types
+
 Copy ALL types from `frontend/types/` in the main app. They map 1:1 to backend entities. No need to recreate — copy the entire `types/` folder into the new console app.
 
 ### APIs
+
 Copy ALL API modules from `frontend/api/` in the main app. They already point to the correct backend. Add `update` methods to every API module:
 
 ```typescript
@@ -318,14 +333,18 @@ update: async (identifier: string, data: Partial<Entity>): Promise<Entity> => {
 You will need to add corresponding `PUT` endpoints in the Spring Boot controllers.
 
 ### Auth Context
+
 Create a React Context (`AuthContext`) that:
+
 - Stores `user`, `token`, `isLoading` state
 - Provides `login(email, password)`, `logout()`, `isAuthenticated`
 - On mount, checks `localStorage` for token and calls `/api/auth/me` to restore session
 - Exposes `user.institutes` (from `UserInstituteAssociation` lookup)
 
 ### Institute Context
+
 Create an `InstituteContext` that:
+
 - Holds the currently selected institute (for users with multiple)
 - Fetches full institute data on selection
 - Provides `refreshInstitute()` to reload data after updates
@@ -335,6 +354,7 @@ Create an `InstituteContext` that:
 ## Backend Changes Required
 
 ### 1. Authentication Module (NEW)
+
 - `pom.xml`: Add `spring-boot-starter-security`, `jjwt-api`, `jjwt-impl`, `jjwt-jackson`
 - `config/SecurityConfig.java`: Permit all OPTIONS, permit `/api/auth/**`, require auth for everything else
 - `Controller/auth/AuthController.java`:
@@ -345,16 +365,20 @@ Create an `InstituteContext` that:
 - `filter/JwtAuthFilter.java`: Extract token, validate, set SecurityContext
 
 ### 2. Add PUT Endpoints to ALL Controllers
+
 Every controller needs:
+
 ```java
 @PutMapping("/{identifier}")
 public ResponseEntity<?> update(@PathVariable String identifier, @RequestBody Entity entity) {
     // Load existing, merge fields, save
 }
 ```
+
 Add to: Institute, Branch, InstituteFacility, InstituteCourse, Batch, Faculty, Result, AwardAndRecognition, Review, InstituteResponse, Media, Faq, Notification, SubscriptionPlan, InstituteSubscription, Inquiry, User, UserInstituteAssociation, Bookmark.
 
 ### 3. Add Login Fields to User Entity
+
 Add `password` field (String, 500 chars) to `User` entity. Consider BCrypt encoding in the service layer.
 
 ---
@@ -484,7 +508,7 @@ institute-console/
 ## Environment Variables
 
 ```env
-VITE_API_URL=http://localhost:8080/api
+VITE_API_URL=http://https://orca-app-s8tpj.ondigitalocean.app//api
 ```
 
 ---
