@@ -75,7 +75,7 @@ export default function LoginPage() {
               <div className="w-16 h-16 rounded-2xl bg-primary-600 flex items-center justify-center mb-4 shadow-lg shadow-primary-200">
                 <GraduationCap size={32} className="text-white" />
               </div>
-              <h1 className="text-2xl font-bold text-slate-900">Institute Console</h1>
+              <h1 className="text-2xl font-bold text-slate-900">Institute Console Hehe</h1>
               <p className="text-sm text-slate-500 mt-1">Sign in to manage your institute</p>
             </div>
 
