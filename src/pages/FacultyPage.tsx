@@ -1,0 +1,383 @@
+import { useEffect, useState } from 'react';
+import { useInstitute } from '@/context/InstituteContext';
+import { facultyApi, uploadApi } from '@/api';
+import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import EmptyState from '@/components/shared/EmptyState';
+import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import { Plus, Pencil, Trash2, Users, Star, Upload } from 'lucide-react';
+import type { Faculty } from '@/types';
+import { toast } from 'sonner';
+import { facultyImageUrl } from '@/lib/image-url';
+
+const emptyFaculty: Partial<Faculty> = {
+  name: '',
+  photoUrl: '',
+  designation: '',
+  qualification: '',
+  experienceYears: 0,
+  bio: '',
+  specialization: '',
+  iitIimBackground: false,
+  nitBackground: false,
+  achievements: '',
+  formerInstitutes: '',
+  studentRating: 0,
+  displayOrder: 0,
+  isActive: true,
+  subjectIdentifiers: [],
+  examTypeIdentifiers: [],
+};
+
+export default function FacultyPage() {
+  const { institute } = useInstitute();
+  const [faculty, setFaculty] = useState<Faculty[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingFaculty, setEditingFaculty] = useState<Partial<Faculty> | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<Faculty | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+
+  const loadData = async () => {
+    if (!institute?.identifier) {
+      setIsLoading(false);
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const data = await facultyApi.findByInstituteIdentifier(institute.identifier);
+      setFaculty(data);
+    } catch (err) {
+      console.error('Failed to load faculty', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [institute?.identifier]);
+
+  const openAdd = () => {
+    setIsEditMode(false);
+    setEditingFaculty({ ...emptyFaculty, instituteIdentifier: institute?.identifier || '', identifier: crypto.randomUUID() });
+    setModalOpen(true);
+  };
+
+  const openEdit = (f: Faculty) => {
+    setIsEditMode(true);
+    setEditingFaculty({ ...f });
+    setModalOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!editingFaculty) return;
+    setIsSaving(true);
+    try {
+      if (isEditMode) {
+        await facultyApi.update(editingFaculty.identifier!, editingFaculty);
+      } else {
+        await facultyApi.create(editingFaculty);
+      }
+      await loadData();
+      toast.success('Saved successfully');
+      setModalOpen(false);
+    } catch (err) {
+      toast.error('Failed to save');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteConfirm) return;
+    try {
+      await facultyApi.delete(deleteConfirm.identifier);
+      await loadData();
+      setDeleteConfirm(null);
+    } catch (err) {
+      toast.error('Failed to delete');
+    }
+  };
+
+  const handleChange = (field: string, value: any) => {
+    setEditingFaculty((prev) => (prev ? { ...prev, [field]: value } : null));
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Faculty</h1>
+          <p className="text-sm text-slate-500 mt-1">Manage your institute faculty</p>
+        </div>
+        <button
+          onClick={openAdd}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
+        >
+          <Plus size={16} /> Add Faculty
+        </button>
+      </div>
+
+      {faculty.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
+          <EmptyState
+            icon={Users}
+            title="No faculty yet"
+            description="Add your first faculty member to get started"
+            action={
+              <button
+                onClick={openAdd}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-medium hover:bg-primary-700"
+              >
+                <Plus size={16} /> Add Faculty
+              </button>
+            }
+          />
+        </div>
+      ) : (
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-slate-500">
+                <tr>
+                  <th className="text-left px-5 py-3 font-medium">Faculty</th>
+                  <th className="text-left px-5 py-3 font-medium">Designation</th>
+                  <th className="text-left px-5 py-3 font-medium">Experience</th>
+                  <th className="text-left px-5 py-3 font-medium">Rating</th>
+                  <th className="text-left px-5 py-3 font-medium">Status</th>
+                  <th className="text-right px-5 py-3 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {faculty.map((f) => (
+                  <tr key={f.identifier} className="hover:bg-slate-50">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden flex-shrink-0">
+                          {f.photoUrl ? (
+                            <img src={facultyImageUrl(f.photoUrl)} alt={f.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-slate-500 text-sm font-bold">
+                              {f.name?.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900">{f.name}</p>
+                          {f.iitIimBackground && (
+                            <span className="text-xs text-primary-600 font-medium">IIT/IIM</span>
+                          )}
+                          {f.nitBackground && (
+                            <span className="text-xs text-primary-600 font-medium ml-1">NIT</span>
+                          )}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3 text-slate-600">{f.designation}</td>
+                    <td className="px-5 py-3 text-slate-600">{f.experienceYears} years</td>
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-1 text-amber-500">
+                        <Star size={14} fill="currentColor" />
+                        <span className="font-medium">{typeof f.studentRating === 'string' ? parseFloat(f.studentRating).toFixed(1) : f.studentRating}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${f.isActive ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                        {f.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => openEdit(f)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
+                          <Pencil size={16} />
+                        </button>
+                        <button onClick={() => setDeleteConfirm(f)} className="p-1.5 rounded-lg hover:bg-red-50 text-red-500">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {modalOpen && editingFaculty && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setModalOpen(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+            <h2 className="text-xl font-bold text-slate-900 mb-5">
+              {editingFaculty.identifier ? 'Edit Faculty' : 'Add Faculty'}
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Name</label>
+                <input
+                  value={editingFaculty.name || ''}
+                  onChange={(e) => handleChange('name', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Photo</label>
+                <div className="flex gap-2">
+                  <input
+                    value={editingFaculty.photoUrl || ''}
+                    onChange={(e) => handleChange('photoUrl', e.target.value)}
+                    placeholder="Photo URL or upload below"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                  <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 cursor-pointer transition-colors">
+                    <Upload size={16} />
+                    {isUploading ? 'Uploading...' : 'Upload'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file || !editingFaculty?.identifier) return;
+                        setIsUploading(true);
+                        try {
+                          // Pass old photo key to delete it before uploading new one
+                          const oldPhotoKey = editingFaculty.photoUrl;
+                          const result = await uploadApi.uploadFacultyImage(file, editingFaculty.identifier, oldPhotoKey);
+                          // Store the object key, not the full URL
+                          handleChange('photoUrl', result.key);
+                          toast.success('Photo uploaded successfully');
+                        } catch (err) {
+                          toast.error('Failed to upload photo');
+                        } finally {
+                          setIsUploading(false);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                {editingFaculty.photoUrl && (
+                  <img src={facultyImageUrl(editingFaculty.photoUrl)} alt="Preview" className="mt-2 w-20 h-20 rounded-xl object-cover border border-slate-200" />
+                )}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Designation</label>
+                <input
+                  value={editingFaculty.designation || ''}
+                  onChange={(e) => handleChange('designation', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Qualification</label>
+                <input
+                  value={editingFaculty.qualification || ''}
+                  onChange={(e) => handleChange('qualification', e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Experience (years)</label>
+                <input
+                  type="number"
+                  value={editingFaculty.experienceYears || ''}
+                  onChange={(e) => handleChange('experienceYears', Number(e.target.value))}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Student Rating</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  min="0"
+                  max="5"
+                  value={editingFaculty.studentRating || ''}
+                  onChange={(e) => handleChange('studentRating', Number(e.target.value))}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Bio</label>
+                <textarea
+                  value={editingFaculty.bio || ''}
+                  onChange={(e) => handleChange('bio', e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Specialization</label>
+                <textarea
+                  value={editingFaculty.specialization || ''}
+                  onChange={(e) => handleChange('specialization', e.target.value)}
+                  rows={2}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Achievements</label>
+                <textarea
+                  value={editingFaculty.achievements || ''}
+                  onChange={(e) => handleChange('achievements', e.target.value)}
+                  rows={2}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Former Institutes</label>
+                <textarea
+                  value={editingFaculty.formerInstitutes || ''}
+                  onChange={(e) => handleChange('formerInstitutes', e.target.value)}
+                  rows={2}
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                />
+              </div>
+              <div className="flex items-center gap-6 flex-wrap">
+                {[
+                  { label: 'IIT/IIM Background', field: 'iitIimBackground' },
+                  { label: 'NIT Background', field: 'nitBackground' },
+                  { label: 'Active', field: 'isActive' },
+                ].map((t) => (
+                  <label key={t.field} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={(editingFaculty as any)[t.field] || false}
+                      onChange={(e) => handleChange(t.field, e.target.checked)}
+                      className="w-4 h-4 rounded border-slate-300 text-primary-600"
+                    />
+                    <span className="text-sm text-slate-700">{t.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
+              <button onClick={() => setModalOpen(false)} className="px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200">Cancel</button>
+              <button onClick={handleSave} disabled={isSaving} className="px-4 py-2.5 rounded-xl text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 disabled:opacity-50">
+                {isSaving ? 'Saving...' : 'Save Faculty'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={!!deleteConfirm}
+        title="Delete Faculty"
+        description={`Are you sure you want to delete "${deleteConfirm?.name}"? This action cannot be undone.`}
+        onConfirm={handleDelete}
+        onCancel={() => setDeleteConfirm(null)}
+      />
+    </div>
+  );
+}

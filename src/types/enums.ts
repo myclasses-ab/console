@@ -1,0 +1,142 @@
+/**
+ * Enum Types
+ * Generated from Backend Domain enums
+ */
+
+export enum BookmarkEntityType {
+  INSTITUTE = 'INSTITUTE',
+  COURSE = 'COURSE',
+}
+
+export enum CourseType {
+  REGULAR = 'REGULAR',
+  CRASH = 'CRASH',
+  WEEKEND = 'WEEKEND',
+  ONLINE = 'ONLINE',
+  DISTANCE = 'DISTANCE',
+  HYBRID = 'HYBRID',
+}
+
+export enum ExamLevel {
+  STATE = 'STATE',
+  NATIONAL = 'NATIONAL',
+  INTERNATIONAL = 'INTERNATIONAL',
+}
+
+export enum InquirySource {
+  LISTING_PAGE = 'LISTING_PAGE',
+  COURSE_PAGE = 'COURSE_PAGE',
+  CHAT = 'CHAT',
+  CALLBACK_REQUEST = 'CALLBACK_REQUEST',
+  DIRECT = 'DIRECT',
+}
+
+export enum InquiryStatus {
+  NEW = 'NEW',
+  CONTACTED = 'CONTACTED',
+  FOLLOW_UP = 'FOLLOW_UP',
+  ENROLLED = 'ENROLLED',
+  NOT_INTERESTED = 'NOT_INTERESTED',
+  DROPPED = 'DROPPED',
+}
+
+export enum InstituteStaffRole {
+  OWNER = 'OWNER',
+  ADMIN = 'ADMIN',
+  STAFF = 'STAFF',
+}
+
+export enum InstituteType {
+  OFFLINE = 'OFFLINE',
+  ONLINE = 'ONLINE',
+  HYBRID = 'HYBRID',
+}
+
+export enum MediaEntityType {
+  INSTITUTE = 'INSTITUTE',
+  BRANCH = 'BRANCH',
+  FACULTY = 'FACULTY',
+  RESULT = 'RESULT',
+  FACILITY = 'FACILITY',
+  EVENT = 'EVENT',
+}
+
+export enum MediaType {
+  IMAGE = 'IMAGE',
+  VIDEO = 'VIDEO',
+  DOCUMENT = 'DOCUMENT',
+  YOUTUBE_LINK = 'YOUTUBE_LINK',
+}
+
+export enum NotificationType {
+  INQUIRY_RECEIVED = 'INQUIRY_RECEIVED',
+  REVIEW_APPROVED = 'REVIEW_APPROVED',
+  ADMISSION_REMINDER = 'ADMISSION_REMINDER',
+  SYSTEM = 'SYSTEM',
+}
+
+export enum OwnershipType {
+  INDIVIDUAL = 'INDIVIDUAL',
+  PARTNERSHIP = 'PARTNERSHIP',
+  COMPANY = 'COMPANY',
+  FRANCHISE = 'FRANCHISE',
+}
+
+export enum ProficiencyLevel {
+  PRIMARY = 'PRIMARY',
+  SECONDARY = 'SECONDARY',
+}
+
+export enum RankOrScoreType {
+  AIR_RANK = 'AIR_RANK',
+  STATE_RANK = 'STATE_RANK',
+  PERCENTILE = 'PERCENTILE',
+  MARKS = 'MARKS',
+  SELECTION = 'SELECTION',
+}
+
+export enum ReviewStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  FLAGGED = 'FLAGGED',
+}
+
+export enum Standard {
+  STANDARD_10 = 'STANDARD_10',
+  STANDARD_11 = 'STANDARD_11',
+  STANDARD_12 = 'STANDARD_12',
+  DROPPER = 'DROPPER',
+  STANDARD_11_AND_12 = 'STANDARD_11_AND_12',
+  GRADUATE = 'GRADUATE',
+  OTHER = 'OTHER',
+}
+
+export enum SubscriptionTier {
+  FREE = 'FREE',
+  BASIC = 'BASIC',
+  PREMIUM = 'PREMIUM',
+  FEATURED = 'FEATURED',
+}
+
+export enum UserRole {
+  STUDENT = 'STUDENT',
+  PARENT = 'PARENT',
+  INSTITUTE_ADMIN = 'INSTITUTE_ADMIN',
+  INSTITUTE_STAFF = 'INSTITUTE_STAFF',
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  CONTENT_MANAGER = 'CONTENT_MANAGER',
+}
+
+export enum VoteType {
+  HELPFUL = 'HELPFUL',
+  NOT_HELPFUL = 'NOT_HELPFUL',
+}
+
+export enum LeadDistributionStatus {
+  PENDING = 'PENDING',
+  VIEWED = 'VIEWED',
+  CONTACTED = 'CONTACTED',
+  CONVERTED = 'CONVERTED',
+  EXPIRED = 'EXPIRED',
+}
