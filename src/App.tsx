@@ -21,6 +21,7 @@ import FaqsPage from '@/pages/FaqsPage';
 import FacilitiesPage from '@/pages/FacilitiesPage';
 import SubscriptionPage from '@/pages/SubscriptionPage';
 import SettingsPage from '@/pages/SettingsPage';
+import CreditsPage from '@/pages/CreditsPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -66,6 +67,7 @@ function AppRoutes() {
         <Route path="faqs" element={<PageTransition><FaqsPage /></PageTransition>} />
         <Route path="facilities" element={<PageTransition><FacilitiesPage /></PageTransition>} />
         <Route path="subscription" element={<PageTransition><SubscriptionPage /></PageTransition>} />
+        <Route path="credits" element={<PageTransition><CreditsPage /></PageTransition>} />
         <Route path="settings" element={<PageTransition><SettingsPage /></PageTransition>} />
       </Route>
     </Routes>

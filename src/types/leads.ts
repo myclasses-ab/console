@@ -48,3 +48,16 @@ export interface LeadDistribution {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface LeadRequest {
+  identifier: string;
+  instituteIdentifier: string;
+  examTypeIdentifier: string;
+  quantity: number;
+  totalCost: number;
+  status: string;
+  notes: string;
+  adminNotes: string;
+  createdAt: string;
+  updatedAt: string;
+}

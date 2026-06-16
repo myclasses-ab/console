@@ -13,8 +13,10 @@ import {
   instituteCourseApi,
   instituteSubscriptionApi,
   leadDistributionApi,
+  creditsApi,
+  featuredPurchasesApi,
 } from '@/api';
-import type { Branch, Faculty, Inquiry, Review, InstituteCourse, InstituteSubscription, LeadDistribution } from '@/types';
+import type { Branch, Faculty, Inquiry, Review, InstituteCourse, InstituteSubscription, LeadDistribution, InstituteCredit, FeaturedPurchase } from '@/types';
 import { toast } from 'sonner';
 import {
   BookOpen,
@@ -27,6 +29,7 @@ import {
   CreditCard,
   TrendingUp,
   UserCheck,
+  Coins,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -41,6 +44,8 @@ export default function DashboardPage() {
   const [courses, setCourses] = useState<InstituteCourse[]>([]);
   const [subscriptions, setSubscriptions] = useState<InstituteSubscription[]>([]);
   const [leadDistributions, setLeadDistributions] = useState<LeadDistribution[]>([]);
+  const [credit, setCredit] = useState<InstituteCredit | null>(null);
+  const [featuredPurchases, setFeaturedPurchases] = useState<FeaturedPurchase[]>([]);
 
   useEffect(() => {
     if (!institute?.identifier) {
@@ -50,7 +55,7 @@ export default function DashboardPage() {
     const load = async () => {
       setIsLoading(true);
       try {
-        const [b, f, i, r, c, s, l] = await Promise.all([
+        const [b, f, i, r, c, s, l, cred, fp] = await Promise.all([
           branchApi.findByInstituteIdentifier(institute.identifier),
           facultyApi.findByInstituteIdentifier(institute.identifier),
           inquiryApi.findByInstituteIdentifier(institute.identifier),
@@ -58,6 +63,8 @@ export default function DashboardPage() {
           instituteCourseApi.findByInstituteIdentifier(institute.identifier),
           instituteSubscriptionApi.findByInstituteIdentifier(institute.identifier),
           leadDistributionApi.getByInstitute(institute.identifier),
+          creditsApi.getBalance(institute.identifier).catch(() => null),
+          featuredPurchasesApi.getByInstitute(institute.identifier).catch(() => []),
         ]);
         setBranches(b ?? []);
         setFaculty(f ?? []);
@@ -66,6 +73,8 @@ export default function DashboardPage() {
         setCourses(c ?? []);
         setSubscriptions(s ?? []);
         setLeadDistributions(l ?? []);
+        setCredit(cred);
+        setFeaturedPurchases(fp ?? []);
       } catch (err) {
         console.error('Dashboard load error', err);
       } finally {
@@ -115,6 +124,7 @@ export default function DashboardPage() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard title="Credit Balance" value={credit?.balance ?? 0} icon={Coins} onClick={() => navigate('/credits')} />
         <StatCard title="Total Courses" value={courses.length} icon={BookOpen} />
         <StatCard title="Total Faculty" value={faculty.length} icon={Users} />
         <StatCard title="Pending Inquiries" value={pendingInquiries} icon={Mail} trend="NEW" trendUp={pendingInquiries > 0} />

@@ -38,3 +38,47 @@ export interface InstituteSubscription {
   paymentReference: string;
   createdAt: string;
 }
+
+export interface InstituteCredit {
+  identifier: string;
+  instituteIdentifier: string;
+  balance: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreditTransaction {
+  identifier: string;
+  instituteIdentifier: string;
+  amount: number;
+  type: string;
+  description: string;
+  referenceIdentifier: string;
+  createdAt: string;
+}
+
+export interface FeaturedPurchase {
+  identifier: string;
+  instituteIdentifier: string;
+  cost: number;
+  durationDays: number;
+  status: string;
+  expiresAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreditTopUpRequest {
+  identifier: string;
+  instituteIdentifier: string;
+  requestedCredits: number;
+  amountInRupees: number;
+  transactionIdLast6: string;
+  status: string;
+  approvedBy: string;
+  approvedAt: string;
+  adminNotes: string;
+  createdAt: string;
+  updatedAt: string;
+}
