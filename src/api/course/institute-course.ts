@@ -64,14 +64,6 @@ export const instituteCourseApi = {
   },
 
   /**
-   * Find active institute courses
-   */
-  findActive: async (): Promise<InstituteCourse[]> => {
-    const response = await axios.get<InstituteCourse[]>('/institute-courses/active');
-    return response.data;
-  },
-
-  /**
    * Update institutecourse by identifier
    */
   update: async (identifier: string, data: Partial<InstituteCourse>): Promise<InstituteCourse> => {

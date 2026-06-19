@@ -557,9 +557,7 @@ function CoursesTab({ courses, isLoading }: { courses: InstituteCourse[]; isLoad
                   {course.testSeriesIncluded && (
                     <span className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded-full">Test Series</span>
                   )}
-                  {course.onlineClassesAvailable && (
-                    <span className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded-full">Online Classes</span>
-                  )}
+
                   {course.recordedLecturesAvailable && (
                     <span className="text-xs px-2 py-1 bg-slate-100 text-slate-600 rounded-full">Recorded Lectures</span>
                   )}
@@ -567,14 +565,11 @@ function CoursesTab({ courses, isLoading }: { courses: InstituteCourse[]; isLoad
 
                 <div className="mt-4 pt-4 border-t border-slate-100 space-y-3">
                   <div className="flex items-baseline gap-2">
-                    {course.feeMin ? (
+                    {course.fee ? (
                       <>
                         <span className="text-2xl font-bold text-slate-900">
-                          ₹{Number(course.feeMin).toLocaleString()}
+                          ₹{Number(course.fee).toLocaleString()}
                         </span>
-                        {course.feeMax && Number(course.feeMax) !== Number(course.feeMin) && (
-                          <span className="text-sm text-slate-500">- ₹{Number(course.feeMax).toLocaleString()}</span>
-                        )}
                         {course.durationMonths > 0 && (
                           <span className="text-xs text-slate-400 ml-1">/ {course.durationMonths} months</span>
                         )}
@@ -583,9 +578,7 @@ function CoursesTab({ courses, isLoading }: { courses: InstituteCourse[]; isLoad
                       <span className="text-lg font-medium text-slate-500">Contact for fee details</span>
                     )}
                   </div>
-                  {course.feeDescription && (
-                    <p className="text-sm text-slate-600 bg-slate-50 p-3 rounded-lg">{course.feeDescription}</p>
-                  )}
+
                   {course.scholarshipAvailable && (
                     <div className="flex items-start gap-2 p-3 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-100">
                       <Sparkles className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />

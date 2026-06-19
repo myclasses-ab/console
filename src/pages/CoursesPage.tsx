@@ -11,18 +11,14 @@ import { toast } from 'sonner';
 const emptyCourse: Partial<InstituteCourse> = {
   branchIdentifier: '',
   customName: '',
-  feeMin: 0,
-  feeMax: 0,
-  feeDescription: '',
+  fee: 0,
   scholarshipAvailable: false,
   scholarshipDetails: '',
   durationMonths: 0,
   studyMaterialIncluded: false,
   testSeriesIncluded: false,
-  onlineClassesAvailable: false,
   recordedLecturesAvailable: false,
   admissionOpen: false,
-  isActive: true,
 };
 
 export default function CoursesPage() {
@@ -155,10 +151,9 @@ export default function CoursesPage() {
                 <tr>
                   <th className="text-left px-5 py-3 font-medium">Name</th>
                   <th className="text-left px-5 py-3 font-medium">Branch</th>
-                  <th className="text-left px-5 py-3 font-medium">Fee Range</th>
+                  <th className="text-left px-5 py-3 font-medium">Fee</th>
                   <th className="text-left px-5 py-3 font-medium">Duration</th>
                   <th className="text-left px-5 py-3 font-medium">Admission</th>
-                  <th className="text-left px-5 py-3 font-medium">Status</th>
                   <th className="text-right px-5 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
@@ -168,17 +163,12 @@ export default function CoursesPage() {
                     <td className="px-5 py-3 font-medium text-slate-900">{course.customName || 'Untitled Course'}</td>
                     <td className="px-5 py-3 text-slate-600">{getBranchName(course.branchIdentifier)}</td>
                     <td className="px-5 py-3 text-slate-600">
-                      ₹{course.feeMin?.toLocaleString() || 0} - ₹{course.feeMax?.toLocaleString() || 0}
+                      ₹{Number(course.fee).toLocaleString() || 0}
                     </td>
                     <td className="px-5 py-3 text-slate-600">{course.durationMonths} months</td>
                     <td className="px-5 py-3">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${course.admissionOpen ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
                         {course.admissionOpen ? 'Open' : 'Closed'}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${course.isActive ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
-                        {course.isActive ? 'Active' : 'Inactive'}
                       </span>
                     </td>
                     <td className="px-5 py-3 text-right">
@@ -230,30 +220,12 @@ export default function CoursesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Fee Min (₹)</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Fee (₹)</label>
                 <input
                   type="number"
-                  value={editingCourse.feeMin || ''}
-                  onChange={(e) => handleChange('feeMin', Number(e.target.value))}
+                  value={editingCourse.fee || ''}
+                  onChange={(e) => handleChange('fee', Number(e.target.value))}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Fee Max (₹)</label>
-                <input
-                  type="number"
-                  value={editingCourse.feeMax || ''}
-                  onChange={(e) => handleChange('feeMax', Number(e.target.value))}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Fee Description</label>
-                <textarea
-                  value={editingCourse.feeDescription || ''}
-                  onChange={(e) => handleChange('feeDescription', e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
                 />
               </div>
               <div>
@@ -270,10 +242,8 @@ export default function CoursesPage() {
                   { label: 'Scholarship', field: 'scholarshipAvailable' },
                   { label: 'Study Material', field: 'studyMaterialIncluded' },
                   { label: 'Test Series', field: 'testSeriesIncluded' },
-                  { label: 'Online Classes', field: 'onlineClassesAvailable' },
                   { label: 'Recorded Lectures', field: 'recordedLecturesAvailable' },
                   { label: 'Admission Open', field: 'admissionOpen' },
-                  { label: 'Active', field: 'isActive' },
                 ].map((t) => (
                   <label key={t.field} className="flex items-center gap-2 cursor-pointer">
                     <input
