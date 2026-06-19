@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useInstitute } from "@/context/InstituteContext";
 import { instituteApi, uploadApi } from "@/api";
+import type { Institute } from "@/types";
 import LoadingSpinner from "@/components/shared/LoadingSpinner";
 import {
   Save,
@@ -377,7 +378,6 @@ function InstitutePreview({ institute }: { institute: any }) {
 function ProfileTips({ institute }: { institute: any }) {
   const tips = [
     { label: "Complete your profile 100%", desc: "Complete all sections to rank higher in search results", check: (i: any) => i.name && i.tagline && i.description && i.logoUrl && i.bannerUrl },
-    { label: "Add detailed courses and faculty", desc: "Students look for comprehensive information", check: () => false },
     { label: "Upload high quality photos", desc: "Good photos build trust and credibility", check: (i: any) => i.logoUrl && i.bannerUrl },
     { label: "Keep your profile updated", desc: "Regular updates improve visibility", check: () => true },
   ];
@@ -817,7 +817,7 @@ export default function InstituteProfilePage() {
       <AnimatePresence>
         {showPreviewModal && (
           <InstitutePreviewFull
-            institute={formData}
+            institute={formData as Institute}
             onClose={() => setShowPreviewModal(false)}
           />
         )}
