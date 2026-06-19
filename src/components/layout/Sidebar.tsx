@@ -9,7 +9,6 @@ import {
   Users,
   Trophy,
   MessageSquare,
-  Mail,
   Image,
   HelpCircle,
   Shield,
@@ -53,7 +52,6 @@ const navSections: NavSection[] = [
     items: [
       { label: 'Results & Awards', icon: Trophy, path: '/results' },
       { label: 'Reviews', icon: MessageSquare, path: '/reviews' },
-      { label: 'Inquiries', icon: Mail, path: '/inquiries' },
       { label: 'My Leads', icon: UserCheck, path: '/leads' },
       { label: 'Media', icon: Image, path: '/media' },
       { label: 'FAQs', icon: HelpCircle, path: '/faqs' },

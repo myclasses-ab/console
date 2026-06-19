@@ -1,1 +1,1 @@
-export { leadDistributionApi } from './lead';
+export { inquiryApi } from './inquiry';

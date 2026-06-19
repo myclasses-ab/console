@@ -115,4 +115,12 @@ export const inquiryApi = {
     const response = await axios.put<Inquiry>(`/inquiries/${identifier}`, data);
     return response.data;
   },
+
+  /**
+   * Unlock contact details for an inquiry (spends 1 credit)
+   */
+  unlock: async (inquiryIdentifier: string, instituteIdentifier: string): Promise<Inquiry> => {
+    const response = await axios.post<Inquiry>(`/inquiries/${inquiryIdentifier}/unlock`, { instituteIdentifier });
+    return response.data;
+  },
 };

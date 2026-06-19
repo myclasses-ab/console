@@ -14,7 +14,6 @@ import CoursesPage from '@/pages/CoursesPage';
 import FacultyPage from '@/pages/FacultyPage';
 import ResultsPage from '@/pages/ResultsPage';
 import ReviewsPage from '@/pages/ReviewsPage';
-import InquiriesPage from '@/pages/InquiriesPage';
 import LeadsPage from '@/pages/LeadsPage';
 import MediaPage from '@/pages/MediaPage';
 import FaqsPage from '@/pages/FaqsPage';
@@ -61,7 +60,6 @@ function AppRoutes() {
         <Route path="faculty" element={<PageTransition><FacultyPage /></PageTransition>} />
         <Route path="results" element={<PageTransition><ResultsPage /></PageTransition>} />
         <Route path="reviews" element={<PageTransition><ReviewsPage /></PageTransition>} />
-        <Route path="inquiries" element={<PageTransition><InquiriesPage /></PageTransition>} />
         <Route path="leads" element={<PageTransition><LeadsPage /></PageTransition>} />
         <Route path="media" element={<PageTransition><MediaPage /></PageTransition>} />
         <Route path="faqs" element={<PageTransition><FaqsPage /></PageTransition>} />

@@ -48,7 +48,6 @@ export { userInstituteAssociationApi } from './users/user-institute-association'
 
 // Leads
 export { inquiryApi } from './leads/inquiry';
-export { leadDistributionApi } from './leads';
 
 // Media
 export { mediaApi } from './media/media';
@@ -59,9 +58,6 @@ export { instituteSubscriptionApi } from './subscription/institute-subscription'
 export { creditsApi } from './subscription/credits';
 export { featuredPurchasesApi, type BuyFeaturedPayload } from './subscription/featured-purchases';
 export { creditTopUpsApi, type CreateCreditTopUpPayload } from './subscription/credit-top-ups';
-
-// Lead Requests
-export { leadRequestsApi, type CreateLeadRequestPayload } from './leads/lead-requests';
 
 // Notification
 export { notificationApi } from './notification/notification';

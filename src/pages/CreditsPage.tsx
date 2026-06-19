@@ -4,18 +4,14 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import {
   creditsApi,
-  leadRequestsApi,
   featuredPurchasesApi,
   creditTopUpsApi,
-  examTypeApi,
 } from '@/api';
 import type {
   InstituteCredit,
   CreditTransaction,
-  LeadRequest,
   FeaturedPurchase,
   CreditTopUpRequest,
-  ExamType,
 } from '@/types';
 import { toast } from 'sonner';
 import {
@@ -23,7 +19,6 @@ import {
   IndianRupee,
   ShoppingCart,
   Star,
-  List,
   Clock,
   CheckCircle,
   XCircle,
@@ -33,29 +28,26 @@ import {
 
 const RUPEE_PER_TOKEN = 10;
 const FEATURED_COST = 500;
-const LEAD_COST = 1;
+
+const TRANSACTION_LABELS: Record<string, string> = {
+  CREDIT_TOP_UP: 'Credit top-up',
+  FEATURED_PURCHASE: 'Featured badge',
+  DEDUCTED_FOR_LEAD_UNLOCK: 'Lead unlock',
+};
 
 export default function CreditsPage() {
   const { institute } = useInstitute();
   const [isLoading, setIsLoading] = useState(true);
   const [credit, setCredit] = useState<InstituteCredit | null>(null);
   const [transactions, setTransactions] = useState<CreditTransaction[]>([]);
-  const [leadRequests, setLeadRequests] = useState<LeadRequest[]>([]);
   const [featuredPurchases, setFeaturedPurchases] = useState<FeaturedPurchase[]>([]);
   const [topUps, setTopUps] = useState<CreditTopUpRequest[]>([]);
-  const [examTypes, setExamTypes] = useState<ExamType[]>([]);
-  const [activeSection, setActiveSection] = useState<'overview' | 'buy' | 'leads' | 'featured'>('overview');
+  const [activeSection, setActiveSection] = useState<'overview' | 'buy' | 'featured'>('overview');
 
   // Buy credits form
   const [buyAmount, setBuyAmount] = useState('');
   const [transactionId, setTransactionId] = useState('');
   const [isSubmittingTopUp, setIsSubmittingTopUp] = useState(false);
-
-  // Request leads form
-  const [selectedExam, setSelectedExam] = useState('');
-  const [leadQuantity, setLeadQuantity] = useState('');
-  const [leadNotes, setLeadNotes] = useState('');
-  const [isRequestingLeads, setIsRequestingLeads] = useState(false);
 
   // Buy featured form
   const [isBuyingFeatured, setIsBuyingFeatured] = useState(false);
@@ -66,20 +58,16 @@ export default function CreditsPage() {
     if (!instituteId) return;
     setIsLoading(true);
     try {
-      const [cred, txns, lr, fp, tu, exams] = await Promise.all([
+      const [cred, txns, fp, tu] = await Promise.all([
         creditsApi.getBalance(instituteId).catch(() => null),
         creditsApi.getTransactions(instituteId).catch(() => []),
-        leadRequestsApi.getByInstitute(instituteId).catch(() => []),
         featuredPurchasesApi.getByInstitute(instituteId).catch(() => []),
         creditTopUpsApi.getByInstitute(instituteId).catch(() => []),
-        examTypeApi.getAll().catch(() => []),
       ]);
       setCredit(cred);
       setTransactions(txns);
-      setLeadRequests(lr);
       setFeaturedPurchases(fp);
       setTopUps(tu);
-      setExamTypes(exams);
     } catch (err) {
       console.error('Credits load error', err);
       toast.error('Failed to load credits data');
@@ -122,42 +110,6 @@ export default function CreditsPage() {
       toast.error(err?.response?.data?.error || 'Failed to submit top-up request');
     } finally {
       setIsSubmittingTopUp(false);
-    }
-  };
-
-  const handleRequestLeads = async () => {
-    const quantity = parseInt(leadQuantity);
-    if (!selectedExam) {
-      toast.error('Please select an exam type');
-      return;
-    }
-    if (!quantity || quantity <= 0) {
-      toast.error('Please enter a valid quantity');
-      return;
-    }
-    const totalCost = quantity * LEAD_COST;
-    if (balance < totalCost) {
-      toast.error(`Insufficient balance. You need ${totalCost} credits.`);
-      return;
-    }
-    setIsRequestingLeads(true);
-    try {
-      await leadRequestsApi.create({
-        instituteIdentifier: instituteId!,
-        examTypeIdentifier: selectedExam,
-        quantity,
-        notes: leadNotes,
-      });
-      toast.success('Lead request submitted successfully!');
-      setSelectedExam('');
-      setLeadQuantity('');
-      setLeadNotes('');
-      setActiveSection('overview');
-      loadData();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.error || 'Failed to request leads');
-    } finally {
-      setIsRequestingLeads(false);
     }
   };
 
@@ -211,12 +163,6 @@ export default function CreditsPage() {
             className="px-4 py-2.5 rounded-xl bg-white text-primary-700 text-sm font-semibold hover:bg-primary-50 transition-colors flex items-center gap-2"
           >
             <IndianRupee size={16} /> Buy Credits
-          </button>
-          <button
-            onClick={() => setActiveSection('leads')}
-            className="px-4 py-2.5 rounded-xl bg-white/20 text-white text-sm font-semibold hover:bg-white/30 transition-colors flex items-center gap-2"
-          >
-            <List size={16} /> Request Leads
           </button>
           <button
             onClick={() => setActiveSection('featured')}
@@ -331,104 +277,6 @@ export default function CreditsPage() {
         </div>
       )}
 
-      {/* Request Leads Section */}
-      {activeSection === 'leads' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-              <List size={20} className="text-blue-600" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Request Leads</h2>
-              <p className="text-sm text-slate-500">{LEAD_COST} credit per lead</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Exam Type</label>
-              <select
-                value={selectedExam}
-                onChange={(e) => setSelectedExam(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              >
-                <option value="">Select exam</option>
-                {examTypes.map((et) => (
-                  <option key={et.identifier} value={et.identifier}>{et.name}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Quantity</label>
-              <input
-                type="number"
-                min={1}
-                value={leadQuantity}
-                onChange={(e) => setLeadQuantity(e.target.value)}
-                placeholder="e.g. 10"
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Total Cost</label>
-              <div className="px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-semibold text-slate-900">
-                {(parseInt(leadQuantity || '0') * LEAD_COST).toLocaleString()} credits
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Notes (optional)</label>
-            <textarea
-              value={leadNotes}
-              onChange={(e) => setLeadNotes(e.target.value)}
-              rows={2}
-              placeholder="Any specific requirements..."
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-            />
-          </div>
-
-          <div className="flex gap-3">
-            <button
-              onClick={() => setActiveSection('overview')}
-              className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleRequestLeads}
-              disabled={isRequestingLeads}
-              className="px-5 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 disabled:opacity-50 transition-colors"
-            >
-              {isRequestingLeads ? 'Requesting...' : 'Request Leads'}
-            </button>
-          </div>
-
-          {/* Lead request history */}
-          <div className="pt-4 border-t border-slate-100">
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Your Lead Requests</h3>
-            {leadRequests.length === 0 ? (
-              <p className="text-sm text-slate-500">No lead requests yet</p>
-            ) : (
-              <div className="space-y-2">
-                {leadRequests.map((lr) => {
-                  const exam = examTypes.find((e) => e.identifier === lr.examTypeIdentifier);
-                  return (
-                    <div key={lr.identifier} className="flex items-center justify-between p-3 rounded-xl bg-slate-50">
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">{lr.quantity} leads • {exam?.name || lr.examTypeIdentifier}</p>
-                        <p className="text-xs text-slate-500">Cost: {lr.totalCost} credits</p>
-                      </div>
-                      <RequestStatusBadge status={lr.status} />
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
       {/* Buy Featured Section */}
       {activeSection === 'featured' && (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-5">
@@ -523,18 +371,7 @@ export default function CreditsPage() {
       {activeSection === 'overview' && (
         <>
           {/* Quick Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <List size={20} className="text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-500">Lead Requests</p>
-                  <p className="text-2xl font-bold text-slate-900">{leadRequests.length}</p>
-                </div>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
@@ -573,7 +410,7 @@ export default function CreditsPage() {
                         {txn.amount > 0 ? <ArrowRight size={14} className="text-green-600 rotate-[-45deg]" /> : <ArrowRight size={14} className="text-red-600 rotate-[135deg]" />}
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-slate-900">{txn.description || txn.type}</p>
+                        <p className="text-sm font-medium text-slate-900">{TRANSACTION_LABELS[txn.type] || txn.description || txn.type}</p>
                         <p className="text-xs text-slate-500">{new Date(txn.createdAt).toLocaleString()}</p>
                       </div>
                     </div>
@@ -614,21 +451,6 @@ function TopUpStatusBadge({ status }: { status: string }) {
     PENDING: 'bg-amber-50 text-amber-700',
     APPROVED: 'bg-green-50 text-green-700',
     REJECTED: 'bg-red-50 text-red-700',
-  };
-  return (
-    <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-slate-100 text-slate-600'}`}>
-      {status}
-    </span>
-  );
-}
-
-function RequestStatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = {
-    PENDING: 'bg-amber-50 text-amber-700',
-    APPROVED: 'bg-blue-50 text-blue-700',
-    FULFILLED: 'bg-green-50 text-green-700',
-    REJECTED: 'bg-red-50 text-red-700',
-    CANCELLED: 'bg-slate-100 text-slate-600',
   };
   return (
     <span className={`px-2 py-1 rounded-full text-xs font-medium ${styles[status] || 'bg-slate-100 text-slate-600'}`}>

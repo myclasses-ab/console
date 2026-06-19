@@ -29,6 +29,7 @@ export enum InquirySource {
   CHAT = 'CHAT',
   CALLBACK_REQUEST = 'CALLBACK_REQUEST',
   DIRECT = 'DIRECT',
+  BOOK_DEMO = 'BOOK_DEMO',
 }
 
 export enum InquiryStatus {
@@ -133,10 +134,3 @@ export enum VoteType {
   NOT_HELPFUL = 'NOT_HELPFUL',
 }
 
-export enum LeadDistributionStatus {
-  PENDING = 'PENDING',
-  VIEWED = 'VIEWED',
-  CONTACTED = 'CONTACTED',
-  CONVERTED = 'CONVERTED',
-  EXPIRED = 'EXPIRED',
-}

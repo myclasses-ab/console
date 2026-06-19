@@ -12,11 +12,10 @@ import {
   reviewApi,
   instituteCourseApi,
   instituteSubscriptionApi,
-  leadDistributionApi,
   creditsApi,
   featuredPurchasesApi,
 } from '@/api';
-import type { Branch, Faculty, Inquiry, Review, InstituteCourse, InstituteSubscription, LeadDistribution, InstituteCredit, FeaturedPurchase } from '@/types';
+import type { Branch, Faculty, Inquiry, Review, InstituteCourse, InstituteSubscription, InstituteCredit, FeaturedPurchase } from '@/types';
 import { toast } from 'sonner';
 import {
   BookOpen,
@@ -43,7 +42,6 @@ export default function DashboardPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [courses, setCourses] = useState<InstituteCourse[]>([]);
   const [subscriptions, setSubscriptions] = useState<InstituteSubscription[]>([]);
-  const [leadDistributions, setLeadDistributions] = useState<LeadDistribution[]>([]);
   const [credit, setCredit] = useState<InstituteCredit | null>(null);
   const [featuredPurchases, setFeaturedPurchases] = useState<FeaturedPurchase[]>([]);
 
@@ -55,14 +53,13 @@ export default function DashboardPage() {
     const load = async () => {
       setIsLoading(true);
       try {
-        const [b, f, i, r, c, s, l, cred, fp] = await Promise.all([
+        const [b, f, i, r, c, s, cred, fp] = await Promise.all([
           branchApi.findByInstituteIdentifier(institute.identifier),
           facultyApi.findByInstituteIdentifier(institute.identifier),
           inquiryApi.findByInstituteIdentifier(institute.identifier),
           reviewApi.findByInstituteIdentifier(institute.identifier),
           instituteCourseApi.findByInstituteIdentifier(institute.identifier),
           instituteSubscriptionApi.findByInstituteIdentifier(institute.identifier),
-          leadDistributionApi.getByInstitute(institute.identifier),
           creditsApi.getBalance(institute.identifier).catch(() => null),
           featuredPurchasesApi.getByInstitute(institute.identifier).catch(() => []),
         ]);
@@ -72,7 +69,6 @@ export default function DashboardPage() {
         setReviews(r ?? []);
         setCourses(c ?? []);
         setSubscriptions(s ?? []);
-        setLeadDistributions(l ?? []);
         setCredit(cred);
         setFeaturedPurchases(fp ?? []);
       } catch (err) {
@@ -85,16 +81,12 @@ export default function DashboardPage() {
   }, [institute?.identifier]);
 
   const pendingInquiries = inquiries.filter((i) => i.status === 'NEW').length;
-  const newLeads = leadDistributions.filter((l) => l.status === 'PENDING').length;
+  const newLeads = pendingInquiries;
   const avgRating = typeof institute?.averageRating === 'string'
     ? parseFloat(institute.averageRating)
     : (institute?.averageRating || 0);
 
   const recentInquiries = [...inquiries].sort((a, b) =>
-    new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-  ).slice(0, 5);
-
-  const recentLeads = [...leadDistributions].sort((a, b) =>
     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
   ).slice(0, 5);
 
@@ -128,7 +120,7 @@ export default function DashboardPage() {
         <StatCard title="Total Courses" value={courses.length} icon={BookOpen} />
         <StatCard title="Total Faculty" value={faculty.length} icon={Users} />
         <StatCard title="Pending Inquiries" value={pendingInquiries} icon={Mail} trend="NEW" trendUp={pendingInquiries > 0} />
-        <StatCard title="New Leads" value={newLeads} icon={UserCheck} trend="ADMIN" trendUp={newLeads > 0} onClick={() => navigate('/leads')} />
+        <StatCard title="New Leads" value={newLeads} icon={UserCheck} trend="NEW" trendUp={newLeads > 0} onClick={() => navigate('/leads')} />
         <StatCard title="Avg Rating" value={avgRating.toFixed(1)} icon={Star} />
         <StatCard title="Total Reviews" value={reviews.length} icon={MessageSquare} />
         <StatCard title="Branches" value={branches.length} icon={TrendingUp} />
@@ -143,7 +135,7 @@ export default function DashboardPage() {
               <UserCheck className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <h3 className="font-semibold text-blue-900">{newLeads} New Lead{newLeads > 1 ? 's' : ''} from Admin</h3>
+              <h3 className="font-semibold text-blue-900">{newLeads} New Lead{newLeads > 1 ? 's' : ''}</h3>
               <p className="text-sm text-blue-700">Check your leads page to view student details.</p>
             </div>
           </div>
@@ -184,7 +176,7 @@ export default function DashboardPage() {
           <div className="flex items-center justify-between p-5 border-b border-slate-100">
             <h2 className="text-lg font-semibold text-slate-900">Recent Inquiries</h2>
             <button
-              onClick={() => navigate('/inquiries')}
+              onClick={() => navigate('/leads')}
               className="text-sm font-medium text-primary-600 hover:text-primary-700"
             >
               View All
@@ -206,8 +198,8 @@ export default function DashboardPage() {
                 <tbody className="divide-y divide-slate-100">
                   {recentInquiries.map((inquiry) => (
                     <tr key={inquiry.identifier} className="hover:bg-slate-50">
-                      <td className="px-5 py-3 font-medium text-slate-900">{inquiry.name}</td>
-                      <td className="px-5 py-3 text-slate-600">{inquiry.phone}</td>
+                      <td className="px-5 py-3 font-medium text-slate-900">{inquiry.studentName || inquiry.name}</td>
+                      <td className="px-5 py-3 text-slate-600">{inquiry.studentPhone || inquiry.phone}</td>
                       <td className="px-5 py-3">
                         <span className={
                           inquiry.status === 'NEW'

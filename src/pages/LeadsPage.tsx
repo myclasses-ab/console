@@ -1,45 +1,52 @@
 import { useEffect, useState } from 'react';
 import { useInstitute } from '@/context/InstituteContext';
-import { leadDistributionApi } from '@/api';
+import { inquiryApi, creditsApi } from '@/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
-import { Phone, Calendar, Eye, UserCheck, X, User, Mail, FileText, Save, Pencil } from 'lucide-react';
-import type { LeadDistribution } from '@/types';
-import { LeadDistributionStatus } from '@/types';
+import { Mail, X, Save, Phone, Calendar, User, BookOpen, Lock } from 'lucide-react';
+import type { Inquiry } from '@/types';
+import { InquiryStatus } from '@/types';
 import { toast } from 'sonner';
 
-const statusConfig: Record<LeadDistributionStatus, { label: string; color: string; icon: typeof Eye }> = {
-  [LeadDistributionStatus.PENDING]: { label: 'New Lead', color: 'bg-blue-50 text-blue-700 border-blue-200', icon: Eye },
-  [LeadDistributionStatus.VIEWED]: { label: 'Viewed', color: 'bg-purple-50 text-purple-700 border-purple-200', icon: Eye },
-  [LeadDistributionStatus.CONTACTED]: { label: 'Contacted', color: 'bg-amber-50 text-amber-700 border-amber-200', icon: Phone },
-  [LeadDistributionStatus.CONVERTED]: { label: 'Converted', color: 'bg-green-50 text-green-700 border-green-200', icon: UserCheck },
-  [LeadDistributionStatus.EXPIRED]: { label: 'Expired', color: 'bg-gray-100 text-gray-600 border-gray-200', icon: X },
-};
+const statusOptions: InquiryStatus[] = [
+  InquiryStatus.NEW,
+  InquiryStatus.CONTACTED,
+  InquiryStatus.FOLLOW_UP,
+  InquiryStatus.ENROLLED,
+  InquiryStatus.NOT_INTERESTED,
+  InquiryStatus.DROPPED,
+];
 
-const statusFilters: { label: string; value: LeadDistributionStatus | 'ALL' }[] = [
+const statusFilters: { label: string; value: InquiryStatus | 'ALL' }[] = [
   { label: 'All', value: 'ALL' },
-  { label: 'New Lead', value: LeadDistributionStatus.PENDING },
-  { label: 'Viewed', value: LeadDistributionStatus.VIEWED },
-  { label: 'Contacted', value: LeadDistributionStatus.CONTACTED },
-  { label: 'Converted', value: LeadDistributionStatus.CONVERTED },
-  { label: 'Expired', value: LeadDistributionStatus.EXPIRED },
+  { label: 'New', value: InquiryStatus.NEW },
+  { label: 'Contacted', value: InquiryStatus.CONTACTED },
+  { label: 'Follow Up', value: InquiryStatus.FOLLOW_UP },
+  { label: 'Enrolled', value: InquiryStatus.ENROLLED },
+  { label: 'Not Interested', value: InquiryStatus.NOT_INTERESTED },
+  { label: 'Dropped', value: InquiryStatus.DROPPED },
 ];
 
-const statusActions: { status: LeadDistributionStatus; label: string }[] = [
-  { status: LeadDistributionStatus.VIEWED, label: 'Mark as Viewed' },
-  { status: LeadDistributionStatus.CONTACTED, label: 'Mark as Contacted' },
-  { status: LeadDistributionStatus.CONVERTED, label: 'Mark as Converted' },
-];
+const statusColors: Record<InquiryStatus, string> = {
+  NEW: 'bg-blue-50 text-blue-700',
+  CONTACTED: 'bg-purple-50 text-purple-700',
+  FOLLOW_UP: 'bg-amber-50 text-amber-700',
+  ENROLLED: 'bg-green-50 text-green-700',
+  NOT_INTERESTED: 'bg-slate-100 text-slate-600',
+  DROPPED: 'bg-red-50 text-red-700',
+};
 
 export default function LeadsPage() {
   const { institute } = useInstitute();
-  const [distributions, setDistributions] = useState<LeadDistribution[]>([]);
-  const [filteredDistributions, setFilteredDistributions] = useState<LeadDistribution[]>([]);
-  const [statusFilter, setStatusFilter] = useState<LeadDistributionStatus | 'ALL'>('ALL');
+  const [inquiries, setInquiries] = useState<Inquiry[]>([]);
+  const [filteredInquiries, setFilteredInquiries] = useState<Inquiry[]>([]);
+  const [statusFilter, setStatusFilter] = useState<InquiryStatus | 'ALL'>('ALL');
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedLead, setSelectedLead] = useState<LeadDistribution | null>(null);
-  const [noteDraft, setNoteDraft] = useState('');
-  const [savingNote, setSavingNote] = useState(false);
+  const [selectedInquiry, setSelectedInquiry] = useState<Inquiry | null>(null);
+  const [notes, setNotes] = useState('');
+  const [isSaving, setIsSaving] = useState(false);
+  const [unlockingId, setUnlockingId] = useState<string | null>(null);
+  const [creditBalance, setCreditBalance] = useState<number>(0);
 
   const loadData = async () => {
     if (!institute?.identifier) {
@@ -48,9 +55,13 @@ export default function LeadsPage() {
     }
     setIsLoading(true);
     try {
-      const data = await leadDistributionApi.getByInstitute(institute.identifier);
-      setDistributions(data);
-      setFilteredDistributions(data);
+      const [data, credit] = await Promise.all([
+        inquiryApi.findByInstituteIdentifier(institute.identifier),
+        creditsApi.getBalance(institute.identifier).catch(() => null),
+      ]);
+      setInquiries(data);
+      setFilteredInquiries(data);
+      setCreditBalance(credit?.balance ?? 0);
     } catch (err) {
       console.error('Failed to load leads', err);
       toast.error('Failed to load leads');
@@ -65,78 +76,90 @@ export default function LeadsPage() {
 
   useEffect(() => {
     if (statusFilter === 'ALL') {
-      setFilteredDistributions(distributions);
+      setFilteredInquiries(inquiries);
     } else {
-      setFilteredDistributions(distributions.filter((d) => d.status === statusFilter));
+      setFilteredInquiries(inquiries.filter((i) => i.status === statusFilter));
     }
-  }, [statusFilter, distributions]);
+  }, [statusFilter, inquiries]);
 
-  useEffect(() => {
-    if (selectedLead) {
-      setNoteDraft(selectedLead.instituteNotes || '');
-    }
-  }, [selectedLead]);
+  const openDetail = (inquiry: Inquiry) => {
+    setSelectedInquiry(inquiry);
+    setNotes(inquiry.instituteNotes || '');
+  };
 
-  const handleUpdateStatus = async (identifier: string, status: LeadDistributionStatus) => {
+  const handleUpdateStatus = async (newStatus: InquiryStatus) => {
+    if (!selectedInquiry) return;
+    setIsSaving(true);
     try {
-      await leadDistributionApi.updateStatus(identifier, status);
-      toast.success(`Lead marked as ${status.toLowerCase()}`);
+      await inquiryApi.update(selectedInquiry.identifier, { status: newStatus });
+      toast.success(`Status updated to ${newStatus}`);
       await loadData();
-      if (selectedLead?.identifier === identifier) {
-        setSelectedLead((prev: LeadDistribution | null) => (prev ? { ...prev, status } : null));
-      }
+      const updated = { ...selectedInquiry, status: newStatus };
+      setSelectedInquiry(updated);
     } catch (err) {
+      console.error('Failed to update status', err);
       toast.error('Failed to update status');
-    }
-  };
-
-  const handleSaveNote = async () => {
-    if (!selectedLead) return;
-    setSavingNote(true);
-    try {
-      await leadDistributionApi.updateNotes(selectedLead.identifier, noteDraft);
-      toast.success('Note saved');
-      await loadData();
-      setSelectedLead((prev) => (prev ? { ...prev, instituteNotes: noteDraft } : null));
-    } catch {
-      toast.error('Failed to save note');
     } finally {
-      setSavingNote(false);
+      setIsSaving(false);
     }
   };
 
-  const getStatusBadge = (status: LeadDistributionStatus) => {
-    const config = statusConfig[status];
-    const Icon = config.icon;
-    return (
-      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full border ${config.color}`}>
-        <Icon className="w-3.5 h-3.5" />
-        {config.label}
-      </span>
-    );
+  const handleSaveNotes = async () => {
+    if (!selectedInquiry) return;
+    setIsSaving(true);
+    try {
+      await inquiryApi.update(selectedInquiry.identifier, { instituteNotes: notes });
+      toast.success('Notes saved');
+      await loadData();
+      setSelectedInquiry((prev: Inquiry | null) => (prev ? { ...prev, instituteNotes: notes } : null));
+    } catch (err) {
+      console.error('Failed to save notes', err);
+      toast.error('Failed to save notes');
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  const handleUnlock = async (inquiry: Inquiry) => {
+    if (!institute?.identifier) return;
+    if (creditBalance < 1) {
+      toast.error('Insufficient credits. You need at least 1 credit to unlock contact details.');
+      return;
+    }
+    setUnlockingId(inquiry.identifier);
+    try {
+      await inquiryApi.unlock(inquiry.identifier, institute.identifier);
+      toast.success('Contact details unlocked');
+      await loadData();
+      if (selectedInquiry?.identifier === inquiry.identifier) {
+        setSelectedInquiry((prev) => (prev ? { ...prev, contactUnlocked: true } : null));
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || 'Failed to unlock contact details');
+    } finally {
+      setUnlockingId(null);
+    }
+  };
+
+  const displayName = (inquiry: Inquiry) => inquiry.studentName || inquiry.name || 'Student';
+  const displayPhone = (inquiry: Inquiry) => inquiry.studentPhone || inquiry.phone || 'N/A';
+  const displayCourse = (inquiry: Inquiry) => inquiry.courseName || inquiry.courseIdentifier || 'N/A';
 
   if (isLoading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
-  if (!institute?.identifier) {
-    return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <EmptyState icon={User} title="No Institute" description="Please set up your institute profile first" />
+      <div className="flex items-center justify-center h-96">
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">My Leads</h1>
-        <p className="text-sm text-slate-500 mt-1">Leads sent by admin — {distributions.length} total</p>
+        <p className="text-sm text-slate-500 mt-1">
+          Student inquiries — {inquiries.length} total
+        </p>
       </div>
 
       {/* Status Filters */}
@@ -156,7 +179,7 @@ export default function LeadsPage() {
         ))}
       </div>
 
-      {filteredDistributions.length === 0 ? (
+      {filteredInquiries.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
           <EmptyState icon={Mail} title="No leads found" description="Leads matching the selected filter will appear here" />
         </div>
@@ -168,67 +191,66 @@ export default function LeadsPage() {
                 <tr>
                   <th className="text-left px-5 py-3 font-medium">Student</th>
                   <th className="text-left px-5 py-3 font-medium">Phone</th>
-                  <th className="text-left px-5 py-3 font-medium">Received</th>
-                  <th className="text-left px-5 py-3 font-medium">Notes</th>
+                  <th className="text-left px-5 py-3 font-medium">Course</th>
+                  <th className="text-left px-5 py-3 font-medium">Date</th>
                   <th className="text-left px-5 py-3 font-medium">Status</th>
                   <th className="text-left px-5 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filteredDistributions.map((dist) => (
+                {filteredInquiries.map((inquiry) => (
                   <tr
-                    key={dist.identifier}
-                    className="hover:bg-gray-50 transition-colors cursor-pointer"
-                    onClick={() => setSelectedLead(dist)}
+                    key={inquiry.identifier}
+                    onClick={() => openDetail(inquiry)}
+                    className="hover:bg-slate-50 cursor-pointer"
                   >
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
                           <User className="w-4 h-4 text-primary-600" />
                         </div>
-                        <span className="font-medium text-slate-900">
-                          {dist.userName || 'Student'}
-                        </span>
+                        <span className="font-medium text-slate-900">{displayName(inquiry)}</span>
                       </div>
                     </td>
                     <td className="px-5 py-3 text-slate-600">
                       <div className="flex items-center gap-1.5">
                         <Phone className="w-3.5 h-3.5 text-slate-400" />
-                        {dist.userPhone || 'N/A'}
+                        {displayPhone(inquiry)}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3 text-slate-600">
+                      <div className="flex items-center gap-1.5">
+                        <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+                        {displayCourse(inquiry)}
                       </div>
                     </td>
                     <td className="px-5 py-3 text-slate-500">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5" />
-                        {new Date(dist.createdAt).toLocaleDateString()}
+                        {new Date(inquiry.createdAt).toLocaleDateString()}
                       </div>
                     </td>
                     <td className="px-5 py-3">
-                      {dist.instituteNotes ? (
-                        <span className="inline-flex items-center gap-1 text-xs text-slate-600 bg-slate-50 px-2 py-1 rounded-lg border border-slate-200 max-w-[180px] truncate">
-                          <FileText className="w-3 h-3 text-slate-400 flex-shrink-0" />
-                          <span className="truncate">{dist.instituteNotes}</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-xs text-slate-400">
-                          <Pencil className="w-3 h-3" />
-                          Add note
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-5 py-3">
-                      {getStatusBadge(dist.status)}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[inquiry.status]}`}>
+                        {inquiry.status}
+                      </span>
                     </td>
                     <td className="px-5 py-3 text-right">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedLead(dist);
-                        }}
-                        className="text-primary-600 hover:text-primary-700 font-medium text-xs"
-                      >
-                        View Details
-                      </button>
+                      {!inquiry.contactUnlocked ? (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleUnlock(inquiry);
+                          }}
+                          disabled={unlockingId === inquiry.identifier}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg transition-colors disabled:opacity-50"
+                        >
+                          <Lock className="w-3.5 h-3.5" />
+                          {unlockingId === inquiry.identifier ? 'Unlocking...' : 'Unlock 1 credit'}
+                        </button>
+                      ) : (
+                        <span className="text-xs text-green-600 font-medium">Unlocked</span>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -238,91 +260,109 @@ export default function LeadsPage() {
         </div>
       )}
 
-      {/* Detail Drawer / Modal */}
-      {selectedLead && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden max-h-[90vh] flex flex-col">
-            <div className="p-6 overflow-y-auto">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-gray-900">Lead Details</h2>
-                <button
-                  onClick={() => setSelectedLead(null)}
-                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-500" />
-                </button>
+      {/* Detail Panel */}
+      {selectedInquiry && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setSelectedInquiry(null)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6">
+            <div className="flex items-center justify-between mb-5">
+              <h2 className="text-xl font-bold text-slate-900">Lead Details</h2>
+              <button onClick={() => setSelectedInquiry(null)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-slate-500 mb-1">Name</p>
+                  <p className="text-sm font-medium text-slate-900">{displayName(selectedInquiry)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 mb-1">Phone</p>
+                  <p className="text-sm font-medium text-slate-900">{displayPhone(selectedInquiry)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 mb-1">Email</p>
+                  <p className="text-sm font-medium text-slate-900">{selectedInquiry.email || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 mb-1">Course</p>
+                  <p className="text-sm font-medium text-slate-900">{displayCourse(selectedInquiry)}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 mb-1">Standard</p>
+                  <p className="text-sm font-medium text-slate-900">{selectedInquiry.standard || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 mb-1">Source</p>
+                  <p className="text-sm font-medium text-slate-900">{selectedInquiry.source}</p>
+                </div>
               </div>
 
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary-600" />
-                  </div>
+              {selectedInquiry.message && (
+                <div className="bg-slate-50 rounded-xl p-4">
+                  <p className="text-xs text-slate-500 mb-1">Message</p>
+                  <p className="text-sm text-slate-700">{selectedInquiry.message}</p>
+                </div>
+              )}
+
+              {!selectedInquiry.contactUnlocked && (
+                <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 flex items-center justify-between">
                   <div>
-                    <p className="font-medium text-gray-900">{selectedLead.userName || 'Student Lead'}</p>
-                    <p className="text-xs text-gray-500">Phone: {selectedLead.userPhone || 'N/A'}</p>
+                    <p className="text-sm font-semibold text-amber-900">Contact details are masked</p>
+                    <p className="text-xs text-amber-700">Unlock this lead to reveal the student name and phone number.</p>
                   </div>
+                  <button
+                    onClick={() => handleUnlock(selectedInquiry)}
+                    disabled={unlockingId === selectedInquiry.identifier || creditBalance < 1}
+                    className="px-4 py-2 rounded-xl bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 disabled:opacity-50 transition-colors"
+                  >
+                    {unlockingId === selectedInquiry.identifier ? 'Unlocking...' : 'Unlock 1 credit'}
+                  </button>
                 </div>
+              )}
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-gray-50 rounded-xl">
-                    <p className="text-xs text-gray-500 mb-1">Status</p>
-                    {getStatusBadge(selectedLead.status)}
-                  </div>
-                  <div className="p-3 bg-gray-50 rounded-xl">
-                    <p className="text-xs text-gray-500 mb-1">Received</p>
-                    <p className="text-sm font-medium text-gray-900">
-                      {new Date(selectedLead.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-
-                {selectedLead.notes && (
-                  <div className="p-3 bg-amber-50 border border-amber-100 rounded-xl">
-                    <p className="text-xs text-amber-600 font-medium mb-1">Admin Notes</p>
-                    <p className="text-sm text-amber-800">{selectedLead.notes}</p>
-                  </div>
-                )}
-
-                {/* Institute Notes */}
-                <div>
-                  <label className="block text-xs font-medium text-gray-500 mb-1.5">
-                    Your Notes
-                  </label>
-                  <textarea
-                    value={noteDraft}
-                    onChange={(e) => setNoteDraft(e.target.value)}
-                    placeholder="Write notes about this student..."
-                    rows={3}
-                    className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                  />
-                  <div className="flex justify-end mt-2">
+              {/* Status Update */}
+              <div>
+                <p className="text-xs text-slate-500 mb-2">Update Status</p>
+                <div className="flex flex-wrap gap-2">
+                  {statusOptions.map((status) => (
                     <button
-                      onClick={handleSaveNote}
-                      disabled={savingNote}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors disabled:opacity-50"
+                      key={status}
+                      onClick={() => handleUpdateStatus(status)}
+                      disabled={isSaving}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                        selectedInquiry.status === status
+                          ? statusColors[status]
+                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+                      }`}
                     >
-                      <Save className="w-3.5 h-3.5" />
-                      {savingNote ? 'Saving...' : 'Save Note'}
+                      {status}
                     </button>
-                  </div>
+                  ))}
                 </div>
+              </div>
 
-                <div className="pt-2">
-                  <p className="text-xs text-gray-500 mb-2">Update Status</p>
-                  <div className="flex flex-wrap gap-2">
-                    {statusActions
-                      .filter((a) => a.status !== selectedLead.status)
-                      .map((action) => (
-                        <button
-                          key={action.status}
-                          onClick={() => handleUpdateStatus(selectedLead.identifier, action.status)}
-                          className="px-3 py-1.5 text-xs font-medium bg-primary-50 text-primary-700 hover:bg-primary-100 rounded-lg transition-colors"
-                        >
-                          {action.label}
-                        </button>
-                      ))}
-                  </div>
+              {/* Notes */}
+              <div>
+                <p className="text-xs text-slate-500 mb-2">Institute Notes</p>
+                <textarea
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={3}
+                  placeholder="Add internal notes about this lead..."
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+                />
+                <div className="flex justify-end mt-2">
+                  <button
+                    onClick={handleSaveNotes}
+                    disabled={isSaving}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
+                  >
+                    <Save size={14} />
+                    {isSaving ? 'Saving...' : 'Save Notes'}
+                  </button>
                 </div>
               </div>
             </div>
