@@ -15,15 +15,8 @@ const emptyFaculty: Partial<Faculty> = {
   designation: '',
   qualification: '',
   experienceYears: 0,
-  bio: '',
-  specialization: '',
-  iitIimBackground: false,
-  nitBackground: false,
-  achievements: '',
-  formerInstitutes: '',
   studentRating: 0,
   displayOrder: 0,
-  isActive: true,
   subjectIdentifiers: [],
   examTypeIdentifiers: [],
 };
@@ -154,7 +147,6 @@ export default function FacultyPage() {
                   <th className="text-left px-5 py-3 font-medium">Designation</th>
                   <th className="text-left px-5 py-3 font-medium">Experience</th>
                   <th className="text-left px-5 py-3 font-medium">Rating</th>
-                  <th className="text-left px-5 py-3 font-medium">Status</th>
                   <th className="text-right px-5 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
@@ -174,12 +166,6 @@ export default function FacultyPage() {
                         </div>
                         <div>
                           <p className="font-medium text-slate-900">{f.name}</p>
-                          {f.iitIimBackground && (
-                            <span className="text-xs text-primary-600 font-medium">IIT/IIM</span>
-                          )}
-                          {f.nitBackground && (
-                            <span className="text-xs text-primary-600 font-medium ml-1">NIT</span>
-                          )}
                         </div>
                       </div>
                     </td>
@@ -190,11 +176,6 @@ export default function FacultyPage() {
                         <Star size={14} fill="currentColor" />
                         <span className="font-medium">{typeof f.studentRating === 'string' ? parseFloat(f.studentRating).toFixed(1) : f.studentRating}</span>
                       </div>
-                    </td>
-                    <td className="px-5 py-3">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${f.isActive ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
-                        {f.isActive ? 'Active' : 'Inactive'}
-                      </span>
                     </td>
                     <td className="px-5 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
@@ -219,7 +200,7 @@ export default function FacultyPage() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setModalOpen(false)} />
           <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
             <h2 className="text-xl font-bold text-slate-900 mb-5">
-              {editingFaculty.identifier ? 'Edit Faculty' : 'Add Faculty'}
+              {isEditMode ? 'Edit Faculty' : 'Add Faculty'}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
@@ -271,7 +252,7 @@ export default function FacultyPage() {
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Designation</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Subject</label>
                 <input
                   value={editingFaculty.designation || ''}
                   onChange={(e) => handleChange('designation', e.target.value)}
@@ -306,59 +287,6 @@ export default function FacultyPage() {
                   onChange={(e) => handleChange('studentRating', Number(e.target.value))}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Bio</label>
-                <textarea
-                  value={editingFaculty.bio || ''}
-                  onChange={(e) => handleChange('bio', e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Specialization</label>
-                <textarea
-                  value={editingFaculty.specialization || ''}
-                  onChange={(e) => handleChange('specialization', e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Achievements</label>
-                <textarea
-                  value={editingFaculty.achievements || ''}
-                  onChange={(e) => handleChange('achievements', e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                />
-              </div>
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Former Institutes</label>
-                <textarea
-                  value={editingFaculty.formerInstitutes || ''}
-                  onChange={(e) => handleChange('formerInstitutes', e.target.value)}
-                  rows={2}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                />
-              </div>
-              <div className="flex items-center gap-6 flex-wrap">
-                {[
-                  { label: 'IIT/IIM Background', field: 'iitIimBackground' },
-                  { label: 'NIT Background', field: 'nitBackground' },
-                  { label: 'Active', field: 'isActive' },
-                ].map((t) => (
-                  <label key={t.field} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={(editingFaculty as any)[t.field] || false}
-                      onChange={(e) => handleChange(t.field, e.target.checked)}
-                      className="w-4 h-4 rounded border-slate-300 text-primary-600"
-                    />
-                    <span className="text-sm text-slate-700">{t.label}</span>
-                  </label>
-                ))}
               </div>
             </div>
             <div className="flex justify-end gap-3 mt-6">

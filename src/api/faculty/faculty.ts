@@ -48,30 +48,6 @@ export const facultyApi = {
   },
 
   /**
-   * Find IIT/IIM background faculty
-   */
-  findByIitIimBackground: async (): Promise<Faculty[]> => {
-    const response = await axios.get<Faculty[]>('/faculty/iit-iim-background');
-    return response.data;
-  },
-
-  /**
-   * Find NIT background faculty
-   */
-  findByNitBackground: async (): Promise<Faculty[]> => {
-    const response = await axios.get<Faculty[]>('/faculty/nit-background');
-    return response.data;
-  },
-
-  /**
-   * Find active faculty
-   */
-  findActive: async (): Promise<Faculty[]> => {
-    const response = await axios.get<Faculty[]>('/faculty/active');
-    return response.data;
-  },
-
-  /**
    * Find faculty with experience greater than specified years
    */
   findByExperienceYearsGreaterThan: async (years: number): Promise<Faculty[]> => {
