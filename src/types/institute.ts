@@ -49,8 +49,7 @@ export interface Branch {
   name: string;
   isMainBranch: boolean;
   isOnlineOnly: boolean;
-  addressLine1: string;
-  addressLine2: string;
+  address: string;
   landmark: string;
   cityIdentifier: string;
   cityName: string;
@@ -61,13 +60,9 @@ export interface Branch {
   googleMapsUrl: string;
   phone: string;
   email: string;
-  totalAreaSqft: number;
-  totalClassrooms: number;
-  seatingCapacity: number;
   operatingHoursStart: string;
   operatingHoursEnd: string;
   operatingDays: string;
-  isActive: boolean;
   createdAt: string;
 }
 

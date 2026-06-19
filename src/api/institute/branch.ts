@@ -72,14 +72,6 @@ export const branchApi = {
   },
 
   /**
-   * Find active branches
-   */
-  findActive: async (): Promise<Branch[]> => {
-    const response = await axios.get<Branch[]>('/branches/active');
-    return response.data;
-  },
-
-  /**
    * Update branch by identifier
    */
   update: async (identifier: string, data: Partial<Branch>): Promise<Branch> => {

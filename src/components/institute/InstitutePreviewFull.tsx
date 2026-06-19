@@ -425,26 +425,11 @@ function OverviewTab({
                     <div className="space-y-4">
                       <div>
                         <p className="text-sm text-slate-500 mb-1">Address</p>
-                        <p className="text-slate-800 font-medium">{branch.addressLine1}</p>
-                        {branch.addressLine2 && <p className="text-slate-600">{branch.addressLine2}</p>}
+                        <p className="text-slate-800 font-medium">{branch.address}</p>
                         <p className="text-slate-700 mt-2">
                           {branch.cityName}, {branch.state} - {branch.pincode}
                         </p>
                       </div>
-                      {(branch.totalClassrooms || branch.seatingCapacity) && (
-                        <div className="flex flex-wrap gap-3 pt-3 border-t border-slate-100">
-                          {branch.totalClassrooms > 0 && (
-                            <div className="px-3 py-1.5 bg-slate-100 rounded-lg">
-                              <span className="text-sm text-slate-600">{branch.totalClassrooms} Classrooms</span>
-                            </div>
-                          )}
-                          {branch.seatingCapacity > 0 && (
-                            <div className="px-3 py-1.5 bg-slate-100 rounded-lg">
-                              <span className="text-sm text-slate-600">{branch.seatingCapacity} Seats</span>
-                            </div>
-                          )}
-                        </div>
-                      )}
                     </div>
                     <div className="space-y-4">
                       {branch.phone && (
