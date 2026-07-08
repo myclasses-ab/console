@@ -4,7 +4,7 @@ import { facultyApi, uploadApi } from '@/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
-import { Plus, Pencil, Trash2, Users, Star, Upload } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, Upload } from 'lucide-react';
 import type { Faculty } from '@/types';
 import { toast } from 'sonner';
 import { facultyImageUrl } from '@/lib/image-url';
@@ -12,10 +12,9 @@ import { facultyImageUrl } from '@/lib/image-url';
 const emptyFaculty: Partial<Faculty> = {
   name: '',
   photoUrl: '',
-  designation: '',
+  subject: '',
   qualification: '',
   experienceYears: 0,
-  studentRating: 0,
   displayOrder: 0,
   subjectIdentifiers: [],
   examTypeIdentifiers: [],
@@ -144,9 +143,8 @@ export default function FacultyPage() {
               <thead className="bg-slate-50 text-slate-500">
                 <tr>
                   <th className="text-left px-5 py-3 font-medium">Faculty</th>
-                  <th className="text-left px-5 py-3 font-medium">Designation</th>
+                  <th className="text-left px-5 py-3 font-medium">Subject</th>
                   <th className="text-left px-5 py-3 font-medium">Experience</th>
-                  <th className="text-left px-5 py-3 font-medium">Rating</th>
                   <th className="text-right px-5 py-3 font-medium">Actions</th>
                 </tr>
               </thead>
@@ -169,14 +167,8 @@ export default function FacultyPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-slate-600">{f.designation}</td>
+                    <td className="px-5 py-3 text-slate-600">{f.subject}</td>
                     <td className="px-5 py-3 text-slate-600">{f.experienceYears} years</td>
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-1 text-amber-500">
-                        <Star size={14} fill="currentColor" />
-                        <span className="font-medium">{typeof f.studentRating === 'string' ? parseFloat(f.studentRating).toFixed(1) : f.studentRating}</span>
-                      </div>
-                    </td>
                     <td className="px-5 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button onClick={() => openEdit(f)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500">
@@ -254,8 +246,8 @@ export default function FacultyPage() {
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Subject</label>
                 <input
-                  value={editingFaculty.designation || ''}
-                  onChange={(e) => handleChange('designation', e.target.value)}
+                  value={editingFaculty.subject || ''}
+                  onChange={(e) => handleChange('subject', e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
@@ -273,18 +265,6 @@ export default function FacultyPage() {
                   type="number"
                   value={editingFaculty.experienceYears || ''}
                   onChange={(e) => handleChange('experienceYears', Number(e.target.value))}
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Student Rating</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  max="5"
-                  value={editingFaculty.studentRating || ''}
-                  onChange={(e) => handleChange('studentRating', Number(e.target.value))}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>

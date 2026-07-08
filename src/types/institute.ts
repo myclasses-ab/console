@@ -91,7 +91,6 @@ export interface InstituteFacility {
   hasFreeDemoClass: boolean;
   hasParentTeacherMeetings: boolean;
   hasPerformanceTracking: boolean;
-  studentToTeacherRatio: string;
   notes: string;
   updatedAt: string;
 }

@@ -96,13 +96,6 @@ export enum RankOrScoreType {
   SELECTION = 'SELECTION',
 }
 
-export enum ReviewStatus {
-  PENDING = 'PENDING',
-  APPROVED = 'APPROVED',
-  REJECTED = 'REJECTED',
-  FLAGGED = 'FLAGGED',
-}
-
 export enum Standard {
   STANDARD_10 = 'STANDARD_10',
   STANDARD_11 = 'STANDARD_11',
@@ -129,8 +122,4 @@ export enum UserRole {
   CONTENT_MANAGER = 'CONTENT_MANAGER',
 }
 
-export enum VoteType {
-  HELPFUL = 'HELPFUL',
-  NOT_HELPFUL = 'NOT_HELPFUL',
-}
 

@@ -4,7 +4,7 @@
  */
 
 import axios from '../axios-helper';
-import type { Review, ReviewStatus, Standard } from '@/types';
+import type { Review, Standard } from '@/types';
 
 export const reviewApi = {
   /**
@@ -56,47 +56,10 @@ export const reviewApi = {
   },
 
   /**
-   * Find reviews by status
-   */
-  findByStatus: async (status: ReviewStatus): Promise<Review[]> => {
-    const response = await axios.get<Review[]>(`/reviews/status/${status}`);
-    return response.data;
-  },
-
-  /**
-   * Find reviews by institute and status
-   */
-  findByInstituteIdentifierAndStatus: async (
-    instituteIdentifier: string,
-    status: ReviewStatus
-  ): Promise<Review[]> => {
-    const response = await axios.get<Review[]>(
-      `/reviews/institute/${instituteIdentifier}/status/${status}`
-    );
-    return response.data;
-  },
-
-  /**
    * Find reviews by standard when enrolled
    */
   findByStandardWhenEnrolled: async (standard: Standard): Promise<Review[]> => {
     const response = await axios.get<Review[]>(`/reviews/standard/${standard}`);
-    return response.data;
-  },
-
-  /**
-   * Find recommended reviews
-   */
-  findByWouldRecommend: async (): Promise<Review[]> => {
-    const response = await axios.get<Review[]>('/reviews/recommended');
-    return response.data;
-  },
-
-  /**
-   * Find verified student reviews
-   */
-  findByIsVerifiedStudent: async (): Promise<Review[]> => {
-    const response = await axios.get<Review[]>('/reviews/verified-student');
     return response.data;
   },
 

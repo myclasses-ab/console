@@ -18,7 +18,6 @@ import {
   Phone,
   Mail,
   Clock,
-  Target,
   Navigation,
   Calendar,
   Award,
@@ -45,7 +44,6 @@ import {
   ThumbsUp,
   ThumbsDown,
   Flag,
-  Quote,
   FileText,
   Share2,
   Bookmark,
@@ -60,8 +58,6 @@ import {
   resultApi,
   reviewApi,
   faqApi,
-  awardAndRecognitionApi,
-  examTypeApi,
   instituteResponseApi,
 } from '@/api';
 import type {
@@ -72,10 +68,7 @@ import type {
   Result,
   Review,
   Faq,
-  AwardAndRecognition,
-  ExamType,
   InstituteResponse,
-  RankOrScoreType,
   Institute,
 } from '@/types';
 import EmptyState from '@/components/shared/EmptyState';
@@ -396,24 +389,6 @@ function InstituteFacilities({ facility }: { facility: InstituteFacility | null 
 
   return (
     <div className="space-y-6">
-      {facility.studentToTeacherRatio && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-primary-600 to-purple-500 rounded-2xl p-6 text-white"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-              <Users className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-white/80 text-sm">Student to Teacher Ratio</p>
-              <p className="text-2xl font-bold">{facility.studentToTeacherRatio}</p>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
         {availableFacilities.map(([key, config], index) => {
           const Icon = config.icon;
@@ -688,7 +663,7 @@ function CourseCardSimple({
   course: InstituteCourse;
   index: number;
 }) {
-  const displayName = course.customName || 'Course';
+  const displayName = course.courseName || 'Course';
 
   return (
     <motion.div
@@ -850,10 +825,7 @@ function FacultyTab({ instituteIdentifier }: { instituteIdentifier: string }) {
       try {
         setIsLoading(true);
         const data = await facultyApi.findByInstituteIdentifier(instituteIdentifier);
-        data.sort((a, b) => {
-          if (a.displayOrder !== b.displayOrder) return a.displayOrder - b.displayOrder;
-          return Number(b.studentRating) - Number(a.studentRating);
-        });
+        data.sort((a, b) => a.displayOrder - b.displayOrder);
         setFaculty(data);
       } catch (err) {
         console.error('Failed to fetch faculty:', err);
@@ -927,7 +899,7 @@ function FacultyTab({ instituteIdentifier }: { instituteIdentifier: string }) {
               )}
             </div>
             <h3 className="font-bold text-slate-900">{f.name}</h3>
-            <p className="text-sm text-primary-600 font-medium mt-0.5">{f.designation}</p>
+            <p className="text-sm text-primary-600 font-medium mt-0.5">{f.subject}</p>
             {f.qualification && <p className="text-xs text-slate-500 mt-1">{f.qualification}</p>}
             {f.experienceYears > 0 && (
               <p className="text-xs text-slate-500 mt-1">{f.experienceYears}+ years experience</p>
@@ -945,10 +917,8 @@ function FacultyTab({ instituteIdentifier }: { instituteIdentifier: string }) {
 
 function ResultsCarousel({
   results,
-  examTypeNames,
 }: {
   results: Result[];
-  examTypeNames: Record<string, string>;
 }) {
   const featuredResults = results.filter((r) => r.isFeatured).length > 0 ? results.filter((r) => r.isFeatured) : results.slice(0, 5);
   const totalSlides = featuredResults.length;
@@ -985,24 +955,6 @@ function ResultsCarousel({
   if (totalSlides === 0) return null;
 
   const currentResult = featuredResults[currentIndex];
-  const examTypeName = examTypeNames[currentResult.examTypeIdentifier] || 'Exam';
-
-  const getRankLabel = (type: RankOrScoreType) => {
-    switch (type) {
-      case 'AIR_RANK':
-        return 'AIR';
-      case 'STATE_RANK':
-        return 'State Rank';
-      case 'PERCENTILE':
-        return 'Percentile';
-      case 'MARKS':
-        return 'Score';
-      case 'SELECTION':
-        return 'Selected';
-      default:
-        return 'Rank';
-    }
-  };
 
   const slideVariants = {
     enter: (direction: number) => ({ x: direction > 0 ? 300 : -300, opacity: 0, scale: 0.95 }),
@@ -1028,7 +980,7 @@ function ResultsCarousel({
         </span>
       </div>
 
-      <div className="relative h-[400px] md:h-[350px] overflow-hidden">
+      <div className="relative h-[320px] md:h-[280px] overflow-hidden">
         <AnimatePresence initial={false} custom={direction} mode="wait">
           <motion.div
             key={currentIndex}
@@ -1052,38 +1004,21 @@ function ResultsCarousel({
                     }}
                   />
                 </div>
-                {currentResult.isVerified && (
-                  <div className="absolute -bottom-1 -right-1 md:bottom-1 md:right-1 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-2 border-white shadow-md">
-                    <CheckCircle className="w-4 h-4 text-white" />
-                  </div>
-                )}
               </div>
 
               <div className="flex-1 text-center md:text-left">
                 <h3 className="text-2xl md:text-3xl font-bold text-slate-900 mb-2">{currentResult.studentName}</h3>
-                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                   <span className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 text-lg font-bold rounded-full">
                     <Trophy className="w-5 h-5" />
-                    {getRankLabel(currentResult.rankOrScoreType)} {currentResult.value}
+                    Score {currentResult.value}
                   </span>
-                  <span className="text-sm text-slate-500">
-                    {examTypeName} {currentResult.examYear}
-                  </span>
+                  {currentResult.exam && (
+                    <span className="text-sm text-slate-500">
+                      {currentResult.exam}
+                    </span>
+                  )}
                 </div>
-                {currentResult.collegeAdmitted && (
-                  <div className="flex items-center justify-center md:justify-start gap-2 text-slate-700 mb-4">
-                    <GraduationCap className="w-5 h-5 text-primary-600" />
-                    <span className="font-medium">Admitted to {currentResult.collegeAdmitted}</span>
-                  </div>
-                )}
-                {currentResult.testimonialQuote && (
-                  <div className="relative mt-4 p-4 bg-white/80 rounded-xl border border-amber-100 max-w-xl">
-                    <Quote className="absolute -top-2 -left-2 w-6 h-6 text-amber-300" />
-                    <p className="text-slate-600 italic text-sm md:text-base leading-relaxed">
-                      &ldquo;{currentResult.testimonialQuote}&rdquo;
-                    </p>
-                  </div>
-                )}
               </div>
             </div>
           </motion.div>
@@ -1125,197 +1060,12 @@ function ResultsCarousel({
 }
 
 
-/* ───────────────────────────────
-   Results - Stats
-   ─────────────────────────────── */
-
-function ResultsStats({ results }: { results: Result[] }) {
-  if (!results.length) return null;
-
-  const totalStudents = results.length;
-  const featuredResults = results.filter((r) => r.isFeatured);
-  const verifiedResults = results.filter((r) => r.isVerified);
-  const airRanks = results.filter((r) => r.rankOrScoreType === 'AIR_RANK');
-  const stateRanks = results.filter((r) => r.rankOrScoreType === 'STATE_RANK');
-  const selections = results.filter((r) => r.rankOrScoreType === 'SELECTION');
-  const examYears = [...new Set(results.map((r) => r.examYear))].sort((a, b) => b - a);
-  const latestYear = examYears[0];
-  const latestYearResults = results.filter((r) => r.examYear === latestYear);
-
-  const topAirRank = (() => {
-    const values = airRanks.map((r) => parseInt(r.value)).filter((v) => !isNaN(v));
-    return values.length > 0 ? Math.min(...values) : null;
-  })();
-
-  const stats = [
-    {
-      label: 'Total Achievers',
-      value: totalStudents.toString(),
-      subtext: 'Results showcased',
-      icon: Users,
-      bgColor: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-    },
-    {
-      label: 'Top AIR Rank',
-      value: topAirRank ? `AIR ${topAirRank}` : 'N/A',
-      subtext: 'Best All India Rank',
-      icon: Trophy,
-      bgColor: 'bg-amber-50',
-      iconColor: 'text-amber-600',
-    },
-    {
-      label: 'IIT/NIT Selections',
-      value: selections.length.toString(),
-      subtext: 'Premier institute admits',
-      icon: GraduationCap,
-      bgColor: 'bg-green-50',
-      iconColor: 'text-green-600',
-    },
-    {
-      label: `Results ${latestYear}`,
-      value: latestYearResults.length.toString(),
-      subtext: 'Students this year',
-      icon: TrendingUp,
-      bgColor: 'bg-purple-50',
-      iconColor: 'text-purple-600',
-    },
-  ];
-
-  return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: index * 0.1 }}
-              className="bg-white rounded-xl p-4 border border-slate-200 shadow-sm hover:shadow-md transition-shadow"
-            >
-              <div className={`w-10 h-10 ${stat.bgColor} rounded-lg flex items-center justify-center mb-3`}>
-                <Icon className={`w-5 h-5 ${stat.iconColor}`} />
-              </div>
-              <div className="text-2xl font-bold text-slate-900">{stat.value}</div>
-              <div className="text-sm font-medium text-slate-700">{stat.label}</div>
-              <div className="text-xs text-slate-500 mt-1">{stat.subtext}</div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.4 }}
-        className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm"
-      >
-        <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-          <Target className="w-5 h-5 text-primary-600" />
-          Achievement Breakdown
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="flex items-center gap-4 p-4 bg-amber-50 rounded-xl">
-            <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-              <Trophy className="w-6 h-6 text-amber-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-amber-700">{airRanks.length}</div>
-              <div className="text-sm text-amber-600">All India Ranks</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 p-4 bg-blue-50 rounded-xl">
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <Award className="w-6 h-6 text-blue-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-blue-700">{stateRanks.length}</div>
-              <div className="text-sm text-blue-600">State Ranks</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-4 p-4 bg-purple-50 rounded-xl">
-            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
-              <Star className="w-6 h-6 text-purple-600" />
-            </div>
-            <div>
-              <div className="text-2xl font-bold text-purple-700">{featuredResults.length}</div>
-              <div className="text-sm text-purple-600">Featured Toppers</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="mt-6 pt-6 border-t border-slate-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-4 h-4 text-green-600" />
-              </div>
-              <div>
-                <div className="text-sm font-medium text-slate-900">Verified Results</div>
-                <div className="text-xs text-slate-500">Authentic & validated</div>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-xl font-bold text-green-600">{verifiedResults.length}</div>
-              <div className="text-xs text-slate-500">
-                {Math.round((verifiedResults.length / totalStudents) * 100)}% verified
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {examYears.length > 1 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.5 }}
-          className="flex flex-wrap items-center gap-2"
-        >
-          <span className="text-sm text-slate-600">Results available for years:</span>
-          {examYears.map((year) => (
-            <span
-              key={year}
-              className={`px-3 py-1 text-sm font-medium rounded-full ${
-                year === latestYear ? 'bg-primary-600 text-white' : 'bg-slate-100 text-slate-600'
-              }`}
-            >
-              {year}
-            </span>
-          ))}
-        </motion.div>
-      )}
-    </div>
-  );
-}
 
 /* ───────────────────────────────
    Result Card
    ─────────────────────────────── */
 
-function ResultCard({ result, index, examTypeName }: { result: Result; index?: number; examTypeName?: string }) {
-  const getRankInfo = (type: RankOrScoreType) => {
-    switch (type) {
-      case 'AIR_RANK':
-        return { label: 'AIR', color: 'text-amber-600', bgColor: 'bg-amber-100', icon: Trophy };
-      case 'STATE_RANK':
-        return { label: 'State Rank', color: 'text-blue-600', bgColor: 'bg-blue-100', icon: Award };
-      case 'PERCENTILE':
-        return { label: 'Percentile', color: 'text-green-600', bgColor: 'bg-green-100', icon: TrendingUp };
-      case 'MARKS':
-        return { label: 'Score', color: 'text-purple-600', bgColor: 'bg-purple-100', icon: Target };
-      case 'SELECTION':
-        return { label: 'Selected', color: 'text-emerald-600', bgColor: 'bg-emerald-100', icon: Star };
-      default:
-        return { label: 'Rank', color: 'text-slate-600', bgColor: 'bg-slate-100', icon: Star };
-    }
-  };
-
-  const rankInfo = getRankInfo(result.rankOrScoreType);
-  const RankIcon = rankInfo.icon;
-
+function ResultCard({ result, index }: { result: Result; index?: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -1336,11 +1086,6 @@ function ResultCard({ result, index, examTypeName }: { result: Result; index?: n
                 }}
               />
             </div>
-            {result.isVerified && (
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
-                <CheckCircle className="w-3 h-3 text-white" />
-              </div>
-            )}
           </div>
 
           <div className="flex-1 min-w-0">
@@ -1357,32 +1102,11 @@ function ResultCard({ result, index, examTypeName }: { result: Result; index?: n
             </div>
 
             <div className="flex items-center gap-2 mt-2">
-              <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 ${rankInfo.bgColor} ${rankInfo.color} text-sm font-semibold rounded-lg`}
-              >
-                <RankIcon className="w-4 h-4" />
-                {rankInfo.label} {result.value}
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-100 text-amber-700 text-sm font-semibold rounded-lg">
+                <Trophy className="w-4 h-4" />
+                Score {result.value}
               </span>
-              {examTypeName && <span className="text-xs text-slate-500">{examTypeName}</span>}
-            </div>
-
-            {result.collegeAdmitted && (
-              <div className="flex items-center gap-1.5 mt-2 text-sm text-slate-600">
-                <GraduationCap className="w-4 h-4 text-primary-600" />
-                <span className="truncate">{result.collegeAdmitted}</span>
-              </div>
-            )}
-
-            {result.testimonialQuote && (
-              <div className="mt-3 p-3 bg-slate-50 rounded-lg">
-                <p className="text-sm text-slate-600 italic line-clamp-2">
-                  &ldquo;{result.testimonialQuote}&rdquo;
-                </p>
-              </div>
-            )}
-
-            <div className="flex items-center justify-between mt-3 text-xs text-slate-500">
-              <span>{result.examYear}</span>
+              {result.exam && <span className="text-xs text-slate-500">{result.exam}</span>}
             </div>
           </div>
         </div>
@@ -1392,108 +1116,19 @@ function ResultCard({ result, index, examTypeName }: { result: Result; index?: n
 }
 
 /* ───────────────────────────────
-   Testimonials
-   ─────────────────────────────── */
-
-function TestimonialSection({
-  results,
-  examTypeNames,
-}: {
-  results: Result[];
-  examTypeNames: Record<string, string>;
-}) {
-  const testimonials = results
-    .filter((r) => r.testimonialQuote && r.testimonialQuote.trim().length > 0)
-    .slice(0, 3);
-
-  if (testimonials.length === 0) return null;
-
-  return (
-    <div className="space-y-6">
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2">
-        <Quote className="w-5 h-5 text-primary-600" />
-        <h3 className="text-lg font-semibold text-slate-900">Student Testimonials</h3>
-      </motion.div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {testimonials.map((testimonial, index) => (
-          <motion.div
-            key={testimonial.identifier}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: index * 0.1 }}
-            className="group relative bg-white rounded-2xl p-5 border border-slate-200 shadow-sm hover:shadow-md transition-all"
-          >
-            <div className="absolute -top-3 -left-2 w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center shadow-md">
-              <Quote className="w-4 h-4 text-white" />
-            </div>
-
-            <p className="text-slate-600 text-sm leading-relaxed mb-4 italic line-clamp-4">
-              &ldquo;{testimonial.testimonialQuote}&rdquo;
-            </p>
-
-            <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-              <div className="relative w-10 h-10 rounded-full overflow-hidden bg-slate-100">
-                <img
-                  src={testimonial.studentPhotoUrl || getPlaceholderImage()}
-                  alt={testimonial.studentName}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = getPlaceholderImage();
-                  }}
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-slate-900 text-sm truncate">{testimonial.studentName}</h4>
-                <p className="text-xs text-slate-500 truncate">
-                  {testimonial.collegeAdmitted || examTypeNames[testimonial.examTypeIdentifier] || 'Student'}
-                </p>
-              </div>
-              {testimonial.isVerified && (
-                <div className="flex-shrink-0 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
-                  <CheckCircle className="w-3 h-3 text-white" />
-                </div>
-              )}
-            </div>
-
-            <div className="absolute top-4 right-4">
-              <span className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded">
-                <Star className="w-3 h-3" />
-                {testimonial.value}
-              </span>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-
-/* ───────────────────────────────
    Results Tab
    ─────────────────────────────── */
 
 function ResultsTab({ instituteIdentifier }: { instituteIdentifier: string }) {
   const [results, setResults] = useState<Result[]>([]);
-  const [examTypeNames, setExamTypeNames] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedYear, setSelectedYear] = useState<number | 'all'>('all');
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [resultsData, examTypes] = await Promise.all([
-          resultApi.findByInstituteIdentifier(instituteIdentifier).catch(() => [] as Result[]),
-          examTypeApi.getAll().catch(() => [] as ExamType[]),
-        ]);
+        const resultsData = await resultApi.findByInstituteIdentifier(instituteIdentifier).catch(() => [] as Result[]);
         setResults(resultsData);
-        const names: Record<string, string> = {};
-        examTypes.forEach((et) => {
-          names[et.identifier] = et.name;
-        });
-        setExamTypeNames(names);
       } catch (err) {
         console.error('Failed to fetch results:', err);
       } finally {
@@ -1503,8 +1138,6 @@ function ResultsTab({ instituteIdentifier }: { instituteIdentifier: string }) {
     if (instituteIdentifier) fetchData();
   }, [instituteIdentifier]);
 
-  const years = [...new Set(results.map((r) => r.examYear))].sort((a, b) => b - a);
-  const filteredResults = selectedYear === 'all' ? results : results.filter((r) => r.examYear === selectedYear);
   const featuredResults = results.filter((r) => r.isFeatured);
 
   if (isLoading) {
@@ -1536,52 +1169,17 @@ function ResultsTab({ instituteIdentifier }: { instituteIdentifier: string }) {
         </div>
       </div>
 
-      {featuredResults.length > 0 && <ResultsCarousel results={featuredResults} examTypeNames={examTypeNames} />}
-
-      <ResultsStats results={results} />
-
-      {years.length > 1 && (
-        <div className="flex items-center gap-2 flex-wrap">
-          <Filter className="w-4 h-4 text-slate-500" />
-          <span className="text-sm text-slate-600">Filter by year:</span>
-          <button
-            onClick={() => setSelectedYear('all')}
-            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-              selectedYear === 'all'
-                ? 'bg-primary-600 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            All Years
-          </button>
-          {years.map((year) => (
-            <button
-              key={year}
-              onClick={() => setSelectedYear(year)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-                selectedYear === year
-                  ? 'bg-primary-600 text-white'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {year}
-            </button>
-          ))}
-        </div>
-      )}
+      {featuredResults.length > 0 && <ResultsCarousel results={featuredResults} />}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {filteredResults.map((result, index) => (
+        {results.map((result, index) => (
           <ResultCard
             key={result.identifier}
             result={result}
             index={index}
-            examTypeName={examTypeNames[result.examTypeIdentifier]}
           />
         ))}
       </div>
-
-      <TestimonialSection results={filteredResults} examTypeNames={examTypeNames} />
     </motion.div>
   );
 }
@@ -2188,84 +1786,32 @@ function FaqsTab({ faqs }: { faqs: Faq[] }) {
 }
 
 /* ───────────────────────────────
-   Sidebar (Awards)
-   ─────────────────────────────── */
-
-function Sidebar({ awards, isLoading }: { awards: AwardAndRecognition[]; isLoading: boolean }) {
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="h-48 bg-slate-100 rounded-2xl animate-pulse" />
-      </div>
-    );
-  }
-
-  if (awards.length === 0) return null;
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: 0.1 }}
-      className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200"
-    >
-      <h3 className="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2">
-        <Award className="w-5 h-5 text-orange-500" />
-        Awards & Recognition
-      </h3>
-      <div className="space-y-3">
-        {awards.map((award) => (
-          <div key={award.identifier} className="flex items-start gap-3 p-3 bg-slate-50 rounded-xl">
-            <div className="w-8 h-8 bg-orange-50 rounded-lg flex items-center justify-center flex-shrink-0">
-              <Award className="w-4 h-4 text-orange-500" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-slate-900 text-sm">{award.title}</p>
-              <p className="text-xs text-slate-500">
-                {award.issuingBody}, {award.year}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-}
-
-/* ───────────────────────────────
    Main Component
    ─────────────────────────────── */
 
 export default function InstitutePreviewFull({ institute, onClose }: InstitutePreviewFullProps) {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
-  const [isLoading, setIsLoading] = useState(true);
 
   const [branches, setBranches] = useState<Branch[]>([]);
   const [facility, setFacility] = useState<InstituteFacility | null>(null);
-  const [awards, setAwards] = useState<AwardAndRecognition[]>([]);
   const [faqs, setFaqs] = useState<Faq[]>([]);
 
   useEffect(() => {
     if (!institute?.identifier) return;
 
     const fetchRelatedData = async () => {
-      setIsLoading(true);
       try {
-        const [branchesData, facilityData, awardsData, faqsData] = await Promise.all([
+        const [branchesData, facilityData, faqsData] = await Promise.all([
           branchApi.findByInstituteIdentifier(institute.identifier).catch(() => [] as Branch[]),
           instituteFacilityApi.findByInstituteIdentifier(institute.identifier).catch(() => null),
-          awardAndRecognitionApi.findByInstituteIdentifier(institute.identifier).catch(() => [] as AwardAndRecognition[]),
           faqApi.findByInstituteIdentifier(institute.identifier).catch(() => [] as Faq[]),
         ]);
 
         setBranches(branchesData);
         setFacility(facilityData);
-        setAwards(awardsData);
         setFaqs(faqsData);
       } catch (err) {
         console.error('Error fetching related data:', err);
-      } finally {
-        setIsLoading(false);
       }
     };
 
@@ -2339,13 +1885,6 @@ export default function InstitutePreviewFull({ institute, onClose }: InstitutePr
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Main Content */}
               <div className="lg:col-span-2">{renderTabContent()}</div>
-
-              {/* Sidebar */}
-              <div className="lg:col-span-1">
-                <div className="sticky top-4">
-                  <Sidebar awards={awards} isLoading={isLoading} />
-                </div>
-              </div>
             </div>
           </div>
         </div>

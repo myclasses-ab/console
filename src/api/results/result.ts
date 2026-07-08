@@ -4,7 +4,7 @@
  */
 
 import axios from '../axios-helper';
-import type { Result, RankOrScoreType } from '@/types';
+import type { Result } from '@/types';
 
 export const resultApi = {
   /**
@@ -48,55 +48,10 @@ export const resultApi = {
   },
 
   /**
-   * Find results by exam type identifier
-   */
-  findByExamTypeIdentifier: async (examTypeIdentifier: string): Promise<Result[]> => {
-    const response = await axios.get<Result[]>(`/results/exam-type/${examTypeIdentifier}`);
-    return response.data;
-  },
-
-  /**
-   * Find results by exam year
-   */
-  findByExamYear: async (examYear: number): Promise<Result[]> => {
-    const response = await axios.get<Result[]>(`/results/exam-year/${examYear}`);
-    return response.data;
-  },
-
-  /**
-   * Find results by institute and exam year
-   */
-  findByInstituteIdentifierAndExamYear: async (
-    instituteIdentifier: string,
-    examYear: number
-  ): Promise<Result[]> => {
-    const response = await axios.get<Result[]>(
-      `/results/institute/${instituteIdentifier}/exam-year/${examYear}`
-    );
-    return response.data;
-  },
-
-  /**
    * Find featured results
    */
   findByIsFeatured: async (): Promise<Result[]> => {
     const response = await axios.get<Result[]>('/results/featured');
-    return response.data;
-  },
-
-  /**
-   * Find verified results
-   */
-  findByIsVerified: async (): Promise<Result[]> => {
-    const response = await axios.get<Result[]>('/results/verified');
-    return response.data;
-  },
-
-  /**
-   * Find results by rank or score type
-   */
-  findByRankOrScoreType: async (rankOrScoreType: RankOrScoreType): Promise<Result[]> => {
-    const response = await axios.get<Result[]>(`/results/rank-or-score-type/${rankOrScoreType}`);
     return response.data;
   },
 

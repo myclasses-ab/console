@@ -34,11 +34,9 @@ export { facultyApi } from './faculty/faculty';
 
 // Results
 export { resultApi } from './results/result';
-export { awardAndRecognitionApi } from './results/award-and-recognition';
 
 // Reviews
 export { reviewApi } from './reviews/review';
-export { reviewVoteApi } from './reviews/review-vote';
 export { instituteResponseApi } from './reviews/institute-response';
 
 // Users

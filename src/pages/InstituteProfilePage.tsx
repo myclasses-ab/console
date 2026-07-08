@@ -18,7 +18,6 @@ import {
   Eye,
   Star,
   CheckCircle,
-  Award,
   Users,
   Calendar,
   ArrowRight,

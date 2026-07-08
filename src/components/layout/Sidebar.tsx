@@ -50,7 +50,7 @@ const navSections: NavSection[] = [
   {
     title: 'Engagement',
     items: [
-      { label: 'Results & Awards', icon: Trophy, path: '/results' },
+      { label: 'Results', icon: Trophy, path: '/results' },
       { label: 'Reviews', icon: MessageSquare, path: '/reviews' },
       { label: 'My Leads', icon: UserCheck, path: '/leads' },
       { label: 'Media', icon: Image, path: '/media' },

@@ -5,7 +5,7 @@ export interface InstituteCourse {
   identifier: string;
   instituteIdentifier: string;
   branchIdentifier: string | null;
-  customName: string;
+  courseName: string;
   fee: number | string;
   scholarshipAvailable: boolean;
   scholarshipDetails: string;

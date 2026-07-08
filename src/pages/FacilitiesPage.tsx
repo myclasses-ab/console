@@ -144,26 +144,14 @@ export default function FacilitiesPage() {
               </label>
             ))}
           </div>
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Student-to-Teacher Ratio</label>
-              <input
-                type="text"
-                value={formData.studentToTeacherRatio || ''}
-                onChange={(e) => setFormData((prev) => ({ ...prev, studentToTeacherRatio: e.target.value }))}
-                placeholder="e.g. 15:1"
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Notes</label>
-              <textarea
-                value={formData.notes || ''}
-                onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-                rows={3}
-                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-              />
-            </div>
+          <div className="mt-6">
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Notes</label>
+            <textarea
+              value={formData.notes || ''}
+              onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
+              rows={3}
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+            />
           </div>
         </div>
       </div>
@@ -209,26 +197,14 @@ export default function FacilitiesPage() {
           ))}
         </div>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Student-to-Teacher Ratio</label>
-            <input
-              type="text"
-              value={formData.studentToTeacherRatio || ''}
-              onChange={(e) => setFormData((prev) => ({ ...prev, studentToTeacherRatio: e.target.value }))}
-              placeholder="e.g. 15:1"
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Notes</label>
-            <textarea
-              value={formData.notes || ''}
-              onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
-              rows={3}
-              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-            />
-          </div>
+        <div className="mt-8">
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Notes</label>
+          <textarea
+            value={formData.notes || ''}
+            onChange={(e) => setFormData((prev) => ({ ...prev, notes: e.target.value }))}
+            rows={3}
+            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
+          />
         </div>
       </div>
     </div>

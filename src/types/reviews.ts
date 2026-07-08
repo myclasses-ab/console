@@ -1,9 +1,9 @@
 /**
  * Reviews Entities
- * Reviews & ratings - reviews, votes, and institute responses
+ * Reviews & ratings - reviews and institute responses
  */
 
-import { ReviewStatus, VoteType, Standard } from './enums';
+import { Standard } from './enums';
 
 /**
  * Review - Student/parent reviews of institutes
@@ -16,8 +16,8 @@ export interface Review {
   standardWhenEnrolled: Standard;
   reviewTitle: string;
   reviewText: string;
-  pros: string;
-  cons: string;
+  pros?: string;
+  cons?: string;
   overallRating: number | string;
   facultyRating: number | string;
   studyMaterialRating: number | string;
@@ -25,25 +25,11 @@ export interface Review {
   feeValueRating: number | string;
   onlineSupportRating: number | string;
   resultAchievementRating: number | string;
-  wouldRecommend: boolean;
-  status: ReviewStatus;
-  adminNotes: string;
-  helpfulCount: number;
-  reportedCount: number;
-  isVerifiedStudent: boolean;
+  wouldRecommend?: boolean;
+  helpfulCount?: number;
+  isVerifiedStudent?: boolean;
   createdAt: string;
   updatedAt: string;
-}
-
-/**
- * ReviewVote - Like/dislike votes on reviews
- */
-export interface ReviewVote {
-  identifier: string;
-  reviewIdentifier: string;
-  userIdentifier: string;
-  vote: VoteType;
-  createdAt: string;
 }
 
 /**

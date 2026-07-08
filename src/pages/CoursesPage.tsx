@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 
 const emptyCourse: Partial<InstituteCourse> = {
   branchIdentifier: '',
-  customName: '',
+  courseName: '',
   fee: 0,
   scholarshipAvailable: false,
   scholarshipDetails: '',
@@ -149,7 +149,7 @@ export default function CoursesPage() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-slate-500">
                 <tr>
-                  <th className="text-left px-5 py-3 font-medium">Name</th>
+                  <th className="text-left px-5 py-3 font-medium">Course Name</th>
                   <th className="text-left px-5 py-3 font-medium">Branch</th>
                   <th className="text-left px-5 py-3 font-medium">Fee</th>
                   <th className="text-left px-5 py-3 font-medium">Duration</th>
@@ -160,7 +160,7 @@ export default function CoursesPage() {
               <tbody className="divide-y divide-slate-100">
                 {courses.map((course) => (
                   <tr key={course.identifier} className="hover:bg-slate-50">
-                    <td className="px-5 py-3 font-medium text-slate-900">{course.customName || 'Untitled Course'}</td>
+                    <td className="px-5 py-3 font-medium text-slate-900">{course.courseName || 'Untitled Course'}</td>
                     <td className="px-5 py-3 text-slate-600">{getBranchName(course.branchIdentifier)}</td>
                     <td className="px-5 py-3 text-slate-600">
                       ₹{Number(course.fee).toLocaleString() || 0}
@@ -212,10 +212,10 @@ export default function CoursesPage() {
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Custom Name</label>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Course Name</label>
                 <input
-                  value={editingCourse.customName || ''}
-                  onChange={(e) => handleChange('customName', e.target.value)}
+                  value={editingCourse.courseName || ''}
+                  onChange={(e) => handleChange('courseName', e.target.value)}
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
               </div>
@@ -281,7 +281,7 @@ export default function CoursesPage() {
       <ConfirmDialog
         open={!!deleteConfirm}
         title="Delete Course"
-        description={`Are you sure you want to delete "${deleteConfirm?.customName || 'this course'}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${deleteConfirm?.courseName || 'this course'}"? This action cannot be undone.`}
         onConfirm={handleDelete}
         onCancel={() => setDeleteConfirm(null)}
       />

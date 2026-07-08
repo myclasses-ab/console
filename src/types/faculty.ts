@@ -8,10 +8,9 @@ export interface Faculty {
   instituteIdentifier: string;
   name: string;
   photoUrl: string;
-  designation: string;
+  subject: string;
   qualification: string;
   experienceYears: number;
-  studentRating: number | string;
   displayOrder: number;
   createdAt: string;
   subjectIdentifiers: string[];

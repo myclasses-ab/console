@@ -5,21 +5,10 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import { MessageSquare, Star, Send, X } from 'lucide-react';
 import type { Review, InstituteResponse } from '@/types';
-import { ReviewStatus } from '@/types';
-import { toast } from 'sonner';
-
-const statusFilters: { label: string; value: ReviewStatus | 'ALL' }[] = [
-  { label: 'All', value: 'ALL' },
-  { label: 'Pending', value: ReviewStatus.PENDING },
-  { label: 'Approved', value: ReviewStatus.APPROVED },
-  { label: 'Rejected', value: ReviewStatus.REJECTED },
-];
 
 export default function ReviewsPage() {
   const { institute } = useInstitute();
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [filteredReviews, setFilteredReviews] = useState<Review[]>([]);
-  const [statusFilter, setStatusFilter] = useState<ReviewStatus | 'ALL'>('ALL');
   const [isLoading, setIsLoading] = useState(true);
   const [selectedReview, setSelectedReview] = useState<Review | null>(null);
   const [responseText, setResponseText] = useState('');
@@ -34,7 +23,6 @@ export default function ReviewsPage() {
     try {
       const data = await reviewApi.findByInstituteIdentifier(institute.identifier);
       setReviews(data);
-      setFilteredReviews(data);
     } catch (err) {
       console.error('Failed to load reviews', err);
     } finally {
@@ -45,14 +33,6 @@ export default function ReviewsPage() {
   useEffect(() => {
     loadData();
   }, [institute?.identifier]);
-
-  useEffect(() => {
-    if (statusFilter === 'ALL') {
-      setFilteredReviews(reviews);
-    } else {
-      setFilteredReviews(reviews.filter((r) => r.status === statusFilter));
-    }
-  }, [statusFilter, reviews]);
 
   const handleSendResponse = async () => {
     if (!selectedReview || !responseText.trim() || !institute?.identifier) return;
@@ -96,30 +76,13 @@ export default function ReviewsPage() {
         <p className="text-sm text-slate-500 mt-1">Manage student and parent reviews</p>
       </div>
 
-      {/* Status Filters */}
-      <div className="flex gap-2 mb-6">
-        {statusFilters.map((f) => (
-          <button
-            key={f.value}
-            onClick={() => setStatusFilter(f.value)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-              statusFilter === f.value
-                ? 'bg-primary-600 text-white'
-                : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-
-      {filteredReviews.length === 0 ? (
+      {reviews.length === 0 ? (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
-          <EmptyState icon={MessageSquare} title="No reviews found" description="Reviews matching the selected filter will appear here" />
+          <EmptyState icon={MessageSquare} title="No reviews found" description="Reviews will appear here once students submit them" />
         </div>
       ) : (
         <div className="space-y-4">
-          {filteredReviews.map((review) => {
+          {reviews.map((review) => {
             const overall = typeof review.overallRating === 'string' ? parseFloat(review.overallRating) : review.overallRating;
             return (
               <div
@@ -131,14 +94,6 @@ export default function ReviewsPage() {
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="font-semibold text-slate-900">{review.reviewTitle || 'Review'}</h3>
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        review.status === 'APPROVED' ? 'bg-green-50 text-green-700' :
-                        review.status === 'PENDING' ? 'bg-amber-50 text-amber-700' :
-                        review.status === 'REJECTED' ? 'bg-red-50 text-red-700' :
-                        'bg-slate-100 text-slate-600'
-                      }`}>
-                        {review.status}
-                      </span>
                     </div>
                     <p className="text-sm text-slate-600 line-clamp-2 mb-3">{review.reviewText}</p>
                     <div className="flex items-center gap-4 text-xs text-slate-500">
@@ -193,19 +148,6 @@ export default function ReviewsPage() {
                   </div>
                 ))}
               </div>
-
-              {selectedReview.pros && (
-                <div className="bg-green-50 rounded-xl p-3">
-                  <p className="text-xs font-medium text-green-700 mb-1">Pros</p>
-                  <p className="text-sm text-slate-700">{selectedReview.pros}</p>
-                </div>
-              )}
-              {selectedReview.cons && (
-                <div className="bg-red-50 rounded-xl p-3">
-                  <p className="text-xs font-medium text-red-700 mb-1">Cons</p>
-                  <p className="text-sm text-slate-700">{selectedReview.cons}</p>
-                </div>
-              )}
 
               {/* Response Form */}
               <div className="border-t border-slate-200 pt-4">

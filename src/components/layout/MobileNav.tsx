@@ -120,7 +120,7 @@ export default function MobileNav() {
                 { label: 'Branches', path: '/branches' },
                 { label: 'Courses', path: '/courses' },
                 { label: 'Faculty', path: '/faculty' },
-                { label: 'Results & Awards', path: '/results' },
+                { label: 'Results', path: '/results' },
                 { label: 'Reviews', path: '/reviews' },
                 { label: 'My Leads', path: '/leads' },
                 { label: 'Media', path: '/media' },
