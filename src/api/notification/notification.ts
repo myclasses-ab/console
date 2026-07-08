@@ -70,4 +70,12 @@ export const notificationApi = {
     const response = await axios.put<Notification>(`/notifications/${identifier}`, data);
     return response.data;
   },
+
+  /**
+   * Mark notification as read
+   */
+  markAsRead: async (identifier: string): Promise<Notification> => {
+    const response = await axios.patch<Notification>(`/notifications/${identifier}/read`);
+    return response.data;
+  },
 };

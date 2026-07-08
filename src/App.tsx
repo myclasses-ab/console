@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { AuthProvider } from '@/context/AuthContext';
 import { InstituteProvider } from '@/context/InstituteContext';
+import { NotificationProvider } from '@/context/NotificationContext';
 import { useAuth } from '@/context/AuthContext';
 import AppShell from '@/components/layout/AppShell';
 import PageTransition from '@/components/layout/PageTransition';
@@ -77,8 +78,10 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <InstituteProvider>
-          <AppRoutes />
-          <Toaster position="top-right" richColors />
+          <NotificationProvider>
+            <AppRoutes />
+            <Toaster position="top-right" richColors />
+          </NotificationProvider>
         </InstituteProvider>
       </AuthProvider>
     </BrowserRouter>

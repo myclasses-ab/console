@@ -9,6 +9,56 @@ import type { Faculty } from '@/types';
 import { toast } from 'sonner';
 import { facultyImageUrl } from '@/lib/image-url';
 
+function getInitials(name: string) {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return '?';
+  if (words.length === 1) return words[0][0].toUpperCase();
+  return (words[0][0] + words[words.length - 1][0]).toUpperCase();
+}
+
+function getAvatarColor(name: string) {
+  const colors = [
+    '#ef4444', '#f97316', '#f59e0b', '#84cc16', '#10b981',
+    '#06b6d4', '#3b82f6', '#6366f1', '#8b5cf6', '#d946ef',
+    '#f43f5e', '#14b8a6', '#0ea5e9', '#a855f7', '#ec4899',
+  ];
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
+function FacultyAvatar({ photoUrl, name }: { photoUrl?: string | null; name: string }) {
+  const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
+  const imageUrl = photoUrl ? facultyImageUrl(photoUrl) : null;
+  const showImage = !!imageUrl && status === 'loaded';
+
+  return (
+    <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 relative">
+      <div
+        className={`absolute inset-0 flex items-center justify-center text-white text-sm font-bold uppercase transition-opacity duration-200 ${
+          showImage ? 'opacity-0' : 'opacity-100'
+        }`}
+        style={{ backgroundColor: getAvatarColor(name) }}
+      >
+        {getInitials(name)}
+      </div>
+      {imageUrl && (
+        <img
+          src={imageUrl}
+          alt={name}
+          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-200 ${
+            showImage ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={() => setStatus('loaded')}
+          onError={() => setStatus('error')}
+        />
+      )}
+    </div>
+  );
+}
+
 const emptyFaculty: Partial<Faculty> = {
   name: '',
   photoUrl: '',
@@ -153,15 +203,7 @@ export default function FacultyPage() {
                   <tr key={f.identifier} className="hover:bg-slate-50">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden flex-shrink-0">
-                          {f.photoUrl ? (
-                            <img src={facultyImageUrl(f.photoUrl)} alt={f.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-slate-500 text-sm font-bold">
-                              {f.name?.charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                        </div>
+                        <FacultyAvatar photoUrl={f.photoUrl} name={f.name} />
                         <div>
                           <p className="font-medium text-slate-900">{f.name}</p>
                         </div>

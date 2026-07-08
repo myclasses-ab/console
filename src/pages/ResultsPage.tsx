@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useInstitute } from '@/context/InstituteContext';
-import { resultApi } from '@/api';
+import { resultApi, uploadApi } from '@/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
-import { Plus, Pencil, Trash2, Trophy } from 'lucide-react';
+import { Plus, Pencil, Trash2, Trophy, Upload } from 'lucide-react';
 import type { Result } from '@/types';
 import { toast } from 'sonner';
+import { studentImageUrl } from '@/lib/image-url';
 
 function getInitials(name: string) {
   const words = name.trim().split(/\s+/).filter(Boolean);
@@ -30,8 +31,9 @@ function getAvatarColor(name: string) {
 
 function StudentPhoto({ name, photoUrl }: { name: string; photoUrl?: string | null }) {
   const [error, setError] = useState(false);
+  const imageUrl = studentImageUrl(photoUrl);
 
-  if (!photoUrl || error) {
+  if (!imageUrl || error) {
     return (
       <div
         className="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-semibold uppercase"
@@ -45,7 +47,7 @@ function StudentPhoto({ name, photoUrl }: { name: string; photoUrl?: string | nu
 
   return (
     <img
-      src={photoUrl}
+      src={imageUrl}
       alt={name}
       className="w-10 h-10 rounded-full object-cover bg-slate-100"
       onError={() => setError(true)}
@@ -71,6 +73,8 @@ export default function ResultsPage() {
   const [editingResult, setEditingResult] = useState<Partial<Result> | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ item: Result } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
   const loadData = async () => {
     if (!institute?.identifier) {
@@ -93,11 +97,13 @@ export default function ResultsPage() {
   }, [institute?.identifier]);
 
   const openAddResult = () => {
-    setEditingResult({ ...emptyResult, instituteIdentifier: institute?.identifier || '' });
+    setIsEditMode(false);
+    setEditingResult({ ...emptyResult, instituteIdentifier: institute?.identifier || '', identifier: crypto.randomUUID() });
     setModalOpen(true);
   };
 
   const openEditResult = (r: Result) => {
+    setIsEditMode(true);
     setEditingResult({ ...r });
     setModalOpen(true);
   };
@@ -106,8 +112,8 @@ export default function ResultsPage() {
     if (!editingResult) return;
     setIsSaving(true);
     try {
-      if (editingResult.identifier) {
-        await resultApi.update(editingResult.identifier, editingResult);
+      if (isEditMode) {
+        await resultApi.update(editingResult.identifier!, editingResult);
       } else {
         await resultApi.create(editingResult as Omit<Result, 'identifier'>);
       }
@@ -220,8 +226,44 @@ export default function ResultsPage() {
                 <input value={editingResult?.studentName || ''} onChange={(e) => handleChange('studentName', e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500" />
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Student Photo URL</label>
-                <input value={editingResult?.studentPhotoUrl || ''} onChange={(e) => handleChange('studentPhotoUrl', e.target.value)} className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Student Photo</label>
+                <div className="flex gap-2">
+                  <input
+                    value={editingResult?.studentPhotoUrl || ''}
+                    onChange={(e) => handleChange('studentPhotoUrl', e.target.value)}
+                    placeholder="Photo URL or upload below"
+                    className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                  <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 cursor-pointer transition-colors">
+                    <Upload size={16} />
+                    {isUploading ? 'Uploading...' : 'Upload'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file || !editingResult?.identifier) return;
+                        setIsUploading(true);
+                        try {
+                          // Pass old photo key to delete it before uploading new one
+                          const oldPhotoKey = editingResult.studentPhotoUrl;
+                          const uploadResult = await uploadApi.uploadStudentImage(file, editingResult.identifier, oldPhotoKey);
+                          // Store the object key, not the full URL
+                          handleChange('studentPhotoUrl', uploadResult.key);
+                          toast.success('Photo uploaded successfully');
+                        } catch (err) {
+                          toast.error('Failed to upload photo');
+                        } finally {
+                          setIsUploading(false);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+                {editingResult?.studentPhotoUrl && (
+                  <img src={studentImageUrl(editingResult.studentPhotoUrl)} alt="Preview" className="mt-2 w-20 h-20 rounded-xl object-cover border border-slate-200" />
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Exam</label>

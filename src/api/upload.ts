@@ -82,6 +82,31 @@ export const uploadApi = {
   },
 
   /**
+   * Upload student image
+   * @param file - The image file
+   * @param resultIdentifier - Result identifier for deterministic naming
+   * @param oldImageUrl - Optional previous image URL/key to delete before upload (for replacement)
+   * @returns Object with key (S3 object key) and fileName
+   */
+  uploadStudentImage: async (
+    file: File, 
+    resultIdentifier: string, 
+    oldImageUrl?: string | null
+  ): Promise<{ key: string; url: string; fileName: string; folder: string; resourceId: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('resultIdentifier', resultIdentifier);
+    if (oldImageUrl) {
+      formData.append('oldImageUrl', oldImageUrl);
+    }
+
+    const response = await axios.post('/upload/student', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  /**
    * Generic upload (fallback for other media types)
    * @param file - The file to upload
    * @param folder - S3 folder name

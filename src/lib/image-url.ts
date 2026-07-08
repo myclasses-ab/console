@@ -68,6 +68,17 @@ export function facultyImageUrl(key: string | null | undefined): string {
 }
 
 /**
+ * Get the full public URL for a student image
+ * Expected S3 key format: studentImage/{resultIdentifier}_image.{ext}
+ * 
+ * @param key - The S3 key, filename, or full URL
+ * @returns Full HTTPS URL or empty string
+ */
+export function studentImageUrl(key: string | null | undefined): string {
+  return s3ImageUrl(key, "studentImage");
+}
+
+/**
  * Get the full public URL for a media gallery image
  * Expected S3 key format: media/{mediaIdentifier}.{ext}
  * 
