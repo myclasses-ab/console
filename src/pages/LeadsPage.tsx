@@ -3,6 +3,7 @@ import { useInstitute } from '@/context/InstituteContext';
 import { inquiryApi, creditsApi } from '@/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
+import MobileListCard from '@/components/shared/MobileListCard';
 import { Mail, X, Save, Phone, Calendar, User, BookOpen, Lock } from 'lucide-react';
 import type { Inquiry } from '@/types';
 import { InquiryStatus } from '@/types';
@@ -163,12 +164,12 @@ export default function LeadsPage() {
       </div>
 
       {/* Status Filters */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
         {statusFilters.map((f) => (
           <button
             key={f.value}
             onClick={() => setStatusFilter(f.value)}
-            className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
+            className={`flex-shrink-0 px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
               statusFilter === f.value
                 ? 'bg-primary-600 text-white'
                 : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
@@ -185,7 +186,8 @@ export default function LeadsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-slate-500">
                 <tr>
@@ -257,6 +259,48 @@ export default function LeadsPage() {
               </tbody>
             </table>
           </div>
+          {/* Mobile cards */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {filteredInquiries.map((inquiry) => (
+              <MobileListCard
+                key={inquiry.identifier}
+                title={displayName(inquiry)}
+                onClick={() => openDetail(inquiry)}
+                subtitle={
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1.5 text-slate-600">
+                      <Phone className="w-3.5 h-3.5 text-slate-400" />
+                      {displayPhone(inquiry)}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-600">
+                      <BookOpen className="w-3.5 h-3.5 text-slate-400" />
+                      {displayCourse(inquiry)}
+                    </div>
+                  </div>
+                }
+                badge={
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${statusColors[inquiry.status]}`}>
+                    {inquiry.status}
+                  </span>
+                }
+                meta={new Date(inquiry.createdAt).toLocaleDateString()}
+                actions={
+                  !inquiry.contactUnlocked ? (
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleUnlock(inquiry); }}
+                      disabled={unlockingId === inquiry.identifier}
+                      className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-amber-50 text-amber-700 hover:bg-amber-100 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      <Lock className="w-3.5 h-3.5" />
+                      {unlockingId === inquiry.identifier ? '...' : '1 cr'}
+                    </button>
+                  ) : (
+                    <span className="text-xs text-green-600 font-medium px-2 py-1.5">Unlocked</span>
+                  )
+                }
+              />
+            ))}
+          </div>
         </div>
       )}
 
@@ -273,7 +317,7 @@ export default function LeadsPage() {
             </div>
 
             <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-slate-500 mb-1">Name</p>
                   <p className="text-sm font-medium text-slate-900">{displayName(selectedInquiry)}</p>

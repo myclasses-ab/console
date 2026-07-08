@@ -16,7 +16,7 @@ export default function AppShell() {
 
       <main
         className={cn(
-          'pt-16 pb-16 lg:pb-6 px-4 sm:px-6 transition-all duration-300 min-h-screen',
+          'pt-16 pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-6 px-4 sm:px-6 transition-all duration-300 min-h-screen',
           sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-72'
         )}
       >

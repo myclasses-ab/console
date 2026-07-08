@@ -25,7 +25,6 @@ const moreItems = [
   { label: 'Results', path: '/results' },
   { label: 'Reviews', path: '/reviews' },
   { label: 'My Leads', path: '/leads' },
-  { label: 'Media', path: '/media' },
   { label: 'FAQs', path: '/faqs' },
   { label: 'Facilities', path: '/facilities' },
   { label: 'Subscription', path: '/subscription' },
@@ -41,7 +40,7 @@ export default function MobileNav() {
   return (
     <>
       {/* Bottom Tab Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 lg:hidden">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 lg:hidden pb-[env(safe-area-inset-bottom)]">
         <div className="flex justify-around items-center h-14">
           {mobileItems.map((item) => {
             const isActive = item.path ? location.pathname === item.path : false;
@@ -72,7 +71,7 @@ export default function MobileNav() {
       {showMore && (
         <>
           <div className="fixed inset-0 z-50 bg-black/40 lg:hidden" onClick={() => setShowMore(false)} />
-          <div className="fixed bottom-14 left-0 right-0 z-50 bg-white rounded-t-2xl border-t border-slate-200 p-4 lg:hidden max-h-[60vh] overflow-y-auto">
+          <div className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] left-0 right-0 z-50 bg-white rounded-t-2xl border-t border-slate-200 p-4 lg:hidden max-h-[60vh] overflow-y-auto pb-[calc(1rem+env(safe-area-inset-bottom))]">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-slate-900">More Options</h3>
               <button onClick={() => setShowMore(false)} className="p-1 rounded-lg hover:bg-slate-100">
@@ -123,8 +122,7 @@ export default function MobileNav() {
                 { label: 'Results', path: '/results' },
                 { label: 'Reviews', path: '/reviews' },
                 { label: 'My Leads', path: '/leads' },
-                { label: 'Media', path: '/media' },
-                { label: 'FAQs', path: '/faqs' },
+                              { label: 'FAQs', path: '/faqs' },
                 { label: 'Facilities', path: '/facilities' },
                 { label: 'Subscription', path: '/subscription' },
                 { label: 'Settings', path: '/settings' },

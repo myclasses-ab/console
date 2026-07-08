@@ -4,6 +4,7 @@ import { resultApi, uploadApi } from '@/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import MobileListCard from '@/components/shared/MobileListCard';
 import { Plus, Pencil, Trash2, Trophy, Upload } from 'lucide-react';
 import type { Result } from '@/types';
 import { toast } from 'sonner';
@@ -152,14 +153,14 @@ export default function ResultsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Results</h1>
           <p className="text-sm text-slate-500 mt-1">Showcase your institute achievements</p>
         </div>
         <button
           onClick={openAddResult}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
         >
           <Plus size={16} /> Add Result
         </button>
@@ -171,44 +172,86 @@ export default function ResultsPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-slate-500">
-              <tr>
-                <th className="text-left px-5 py-3 font-medium">Student</th>
-                <th className="text-left px-5 py-3 font-medium">Exam</th>
-                <th className="text-left px-5 py-3 font-medium">Score</th>
-                <th className="text-left px-5 py-3 font-medium">Featured</th>
-                <th className="text-right px-5 py-3 font-medium">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {results.map((r) => (
-                <tr key={r.identifier} className="hover:bg-slate-50">
-                  <td className="px-5 py-3">
-                    <div className="flex items-center gap-3">
-                      <StudentPhoto name={r.studentName} photoUrl={r.studentPhotoUrl} />
-                      <span className="font-medium text-slate-900">{r.studentName}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-3 text-slate-600">{r.exam || '-'}</td>
-                  <td className="px-5 py-3 text-slate-600">{r.value || '-'}</td>
-                  <td className="px-5 py-3">
-                    {r.isFeatured ? (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700">Featured</span>
-                    ) : (
-                      <span className="text-slate-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => openEditResult(r)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil size={16} /></button>
-                      <button onClick={() => setDeleteConfirm({ item: r })} className="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={16} /></button>
-                    </div>
-                  </td>
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-slate-50 text-slate-500">
+                <tr>
+                  <th className="text-left px-5 py-3 font-medium">Student</th>
+                  <th className="text-left px-5 py-3 font-medium">Exam</th>
+                  <th className="text-left px-5 py-3 font-medium">Score</th>
+                  <th className="text-left px-5 py-3 font-medium">Featured</th>
+                  <th className="text-right px-5 py-3 font-medium">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {results.map((r) => (
+                  <tr key={r.identifier} className="hover:bg-slate-50">
+                    <td className="px-5 py-3">
+                      <div className="flex items-center gap-3">
+                        <StudentPhoto name={r.studentName} photoUrl={r.studentPhotoUrl} />
+                        <span className="font-medium text-slate-900">{r.studentName}</span>
+                      </div>
+                    </td>
+                    <td className="px-5 py-3 text-slate-600">{r.exam || '-'}</td>
+                    <td className="px-5 py-3 text-slate-600">{r.value || '-'}</td>
+                    <td className="px-5 py-3">
+                      {r.isFeatured ? (
+                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700">Featured</span>
+                      ) : (
+                        <span className="text-slate-400">-</span>
+                      )}
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button onClick={() => openEditResult(r)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"><Pencil size={16} /></button>
+                        <button onClick={() => setDeleteConfirm({ item: r })} className="p-1.5 rounded-lg hover:bg-red-50 text-red-500"><Trash2 size={16} /></button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {/* Mobile cards */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {results.map((r) => (
+              <MobileListCard
+                key={r.identifier}
+                title={r.studentName}
+                subtitle={
+                  <div className="space-y-0.5">
+                    <div>{r.exam || 'No exam'}</div>
+                    <div className="text-xs text-slate-500">Score: {r.value || '-'}</div>
+                  </div>
+                }
+                avatar={<StudentPhoto name={r.studentName} photoUrl={r.studentPhotoUrl} />}
+                badge={
+                  r.isFeatured ? (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700">Featured</span>
+                  ) : null
+                }
+                actions={
+                  <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openEditResult(r); }}
+                      className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"
+                      aria-label="Edit result"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm({ item: r }); }}
+                      className="p-2 rounded-lg hover:bg-red-50 text-red-500"
+                      aria-label="Delete result"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </>
+                }
+              />
+            ))}
+          </div>
         </div>
       )}
 

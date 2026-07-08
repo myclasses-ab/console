@@ -88,20 +88,18 @@ export default function ReviewsPage() {
               <div
                 key={review.identifier}
                 onClick={() => setSelectedReview(review)}
-                className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 cursor-pointer hover:border-primary-300 transition-colors"
+                className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-5 cursor-pointer hover:border-primary-300 transition-colors"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-slate-900">{review.reviewTitle || 'Review'}</h3>
-                    </div>
-                    <p className="text-sm text-slate-600 line-clamp-2 mb-3">{review.reviewText}</p>
-                    <div className="flex items-center gap-4 text-xs text-slate-500">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-slate-900 truncate">{review.reviewTitle || 'Review'}</h3>
+                    <p className="text-sm text-slate-600 line-clamp-2 mb-3 mt-1">{review.reviewText}</p>
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs text-slate-500">
                       <span className="flex items-center gap-1">
                         <Star size={12} className={getRatingColor(overall)} fill="currentColor" />
                         <span className={`font-medium ${getRatingColor(overall)}`}>{overall.toFixed(1)}</span>
                       </span>
-                      <span>{review.courseTaken}</span>
+                      <span className="truncate max-w-[120px] sm:max-w-none">{review.courseTaken}</span>
                       <span>{new Date(review.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
@@ -116,7 +114,7 @@ export default function ReviewsPage() {
       {selectedReview && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/40" onClick={() => setSelectedReview(null)} />
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-6">
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-xl font-bold text-slate-900">Review Details</h2>
               <button onClick={() => setSelectedReview(null)} className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400">

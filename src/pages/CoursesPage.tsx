@@ -4,6 +4,7 @@ import { instituteCourseApi, branchApi } from '@/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import MobileListCard from '@/components/shared/MobileListCard';
 import { Plus, Pencil, Trash2, BookOpen } from 'lucide-react';
 import type { InstituteCourse, Branch } from '@/types';
 import { toast } from 'sonner';
@@ -114,14 +115,14 @@ export default function CoursesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Courses</h1>
           <p className="text-sm text-slate-500 mt-1">Manage your institute courses</p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
         >
           <Plus size={16} /> Add Course
         </button>
@@ -145,7 +146,8 @@ export default function CoursesPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-slate-500">
                 <tr>
@@ -185,6 +187,46 @@ export default function CoursesPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+          {/* Mobile cards */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {courses.map((course) => (
+              <MobileListCard
+                key={course.identifier}
+                title={course.courseName || 'Untitled Course'}
+                subtitle={
+                  <div className="space-y-0.5">
+                    <div>{getBranchName(course.branchIdentifier)}</div>
+                    <div className="text-xs text-slate-500">
+                      ₹{Number(course.fee).toLocaleString() || 0} · {course.durationMonths} months
+                    </div>
+                  </div>
+                }
+                badge={
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${course.admissionOpen ? 'bg-green-50 text-green-700' : 'bg-slate-100 text-slate-600'}`}>
+                    {course.admissionOpen ? 'Admission Open' : 'Admission Closed'}
+                  </span>
+                }
+                actions={
+                  <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openEdit(course); }}
+                      className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"
+                      aria-label="Edit course"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm(course); }}
+                      className="p-2 rounded-lg hover:bg-red-50 text-red-500"
+                      aria-label="Delete course"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </>
+                }
+              />
+            ))}
           </div>
         </div>
       )}

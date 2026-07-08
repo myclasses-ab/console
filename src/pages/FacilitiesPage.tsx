@@ -110,7 +110,7 @@ export default function FacilitiesPage() {
   if (!facility && !isLoading) {
     return (
       <div>
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Facilities</h1>
             <p className="text-sm text-slate-500 mt-1">Configure your institute facilities</p>
@@ -118,7 +118,7 @@ export default function FacilitiesPage() {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 disabled:opacity-50"
+            className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 disabled:opacity-50"
           >
             <Save size={16} />
             {isSaving ? 'Saving...' : 'Save Facilities'}
@@ -160,7 +160,7 @@ export default function FacilitiesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Facilities</h1>
           <p className="text-sm text-slate-500 mt-1">Configure your institute facilities</p>
@@ -168,7 +168,7 @@ export default function FacilitiesPage() {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 disabled:opacity-50"
+          className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 disabled:opacity-50"
         >
           <Save size={16} />
           {isSaving ? 'Saving...' : 'Save Facilities'}

@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import StatCard from '@/components/shared/StatCard';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
+import MobileListCard from '@/components/shared/MobileListCard';
 import {
   branchApi,
   facultyApi,
@@ -129,9 +130,9 @@ export default function DashboardPage() {
 
       {/* Leads Banner */}
       {newLeads > 0 && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-5 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-3 sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
               <UserCheck className="w-5 h-5 text-blue-600" />
             </div>
             <div>
@@ -141,7 +142,7 @@ export default function DashboardPage() {
           </div>
           <button
             onClick={() => navigate('/leads')}
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors w-full sm:w-auto"
           >
             View Leads
           </button>
@@ -155,7 +156,6 @@ export default function DashboardPage() {
           {[
             { label: 'Add Course', path: '/courses', icon: Plus },
             { label: 'Add Faculty', path: '/faculty', icon: Plus },
-            { label: 'Upload Media', path: '/media', icon: Plus },
           ].map((action) => (
             <button
               key={action.label}
@@ -185,40 +185,65 @@ export default function DashboardPage() {
           {recentInquiries.length === 0 ? (
             <EmptyState icon={Mail} title="No inquiries yet" description="New inquiries will appear here" />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="bg-slate-50 text-slate-500">
-                  <tr>
-                    <th className="text-left px-5 py-3 font-medium">Name</th>
-                    <th className="text-left px-5 py-3 font-medium">Phone</th>
-                    <th className="text-left px-5 py-3 font-medium">Status</th>
-                    <th className="text-left px-5 py-3 font-medium">Date</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {recentInquiries.map((inquiry) => (
-                    <tr key={inquiry.identifier} className="hover:bg-slate-50">
-                      <td className="px-5 py-3 font-medium text-slate-900">{inquiry.studentName || inquiry.name}</td>
-                      <td className="px-5 py-3 text-slate-600">{inquiry.studentPhone || inquiry.phone}</td>
-                      <td className="px-5 py-3">
-                        <span className={
-                          inquiry.status === 'NEW'
-                            ? 'px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700'
-                            : inquiry.status === 'ENROLLED'
-                            ? 'px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700'
-                            : 'px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600'
-                        }>
-                          {inquiry.status}
-                        </span>
-                      </td>
-                      <td className="px-5 py-3 text-slate-500">
-                        {new Date(inquiry.createdAt).toLocaleDateString()}
-                      </td>
+            <>
+              {/* Desktop table */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-slate-50 text-slate-500">
+                    <tr>
+                      <th className="text-left px-5 py-3 font-medium">Name</th>
+                      <th className="text-left px-5 py-3 font-medium">Phone</th>
+                      <th className="text-left px-5 py-3 font-medium">Status</th>
+                      <th className="text-left px-5 py-3 font-medium">Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {recentInquiries.map((inquiry) => (
+                      <tr key={inquiry.identifier} className="hover:bg-slate-50">
+                        <td className="px-5 py-3 font-medium text-slate-900">{inquiry.studentName || inquiry.name}</td>
+                        <td className="px-5 py-3 text-slate-600">{inquiry.studentPhone || inquiry.phone}</td>
+                        <td className="px-5 py-3">
+                          <span className={
+                            inquiry.status === 'NEW'
+                              ? 'px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700'
+                              : inquiry.status === 'ENROLLED'
+                              ? 'px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700'
+                              : 'px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600'
+                          }>
+                            {inquiry.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3 text-slate-500">
+                          {new Date(inquiry.createdAt).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* Mobile cards */}
+              <div className="md:hidden divide-y divide-slate-100">
+                {recentInquiries.map((inquiry) => (
+                  <MobileListCard
+                    key={inquiry.identifier}
+                    title={inquiry.studentName || inquiry.name || 'Unknown'}
+                    subtitle={inquiry.studentPhone || inquiry.phone}
+                    badge={
+                      <span className={
+                        inquiry.status === 'NEW'
+                          ? 'px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700'
+                          : inquiry.status === 'ENROLLED'
+                          ? 'px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700'
+                          : 'px-2 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-600'
+                      }>
+                        {inquiry.status}
+                      </span>
+                    }
+                    meta={new Date(inquiry.createdAt).toLocaleDateString()}
+                  />
+                ))}
+              </div>
+            </>
           )}
         </div>
 

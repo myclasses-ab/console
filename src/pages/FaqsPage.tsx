@@ -99,14 +99,14 @@ export default function FaqsPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">FAQs</h1>
           <p className="text-sm text-slate-500 mt-1">Manage frequently asked questions</p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
         >
           <Plus size={16} /> Add FAQ
         </button>
@@ -123,16 +123,16 @@ export default function FaqsPage() {
               <div key={faq.identifier} className="group">
                 <button
                   onClick={() => setExpandedId(expandedId === faq.identifier ? null : faq.identifier)}
-                  className="flex items-center justify-between w-full px-5 py-4 text-left hover:bg-slate-50"
+                  className="flex items-start justify-between w-full px-4 sm:px-5 py-4 text-left hover:bg-slate-50 gap-2"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-medium text-slate-400 w-6">{faq.displayOrder}</span>
+                  <div className="flex items-start gap-3 min-w-0">
+                    <span className="text-xs font-medium text-slate-400 w-6 flex-shrink-0 pt-0.5">{faq.displayOrder}</span>
                     <span className="text-sm font-medium text-slate-900">{faq.question}</span>
                     {!faq.isActive && (
-                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500">Inactive</span>
+                      <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-500 flex-shrink-0">Inactive</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
@@ -158,7 +158,7 @@ export default function FaqsPage() {
                   </div>
                 </button>
                 {expandedId === faq.identifier && (
-                  <div className="px-5 pb-4 pl-14">
+                  <div className="px-4 sm:px-5 pb-4 pl-12 sm:pl-14">
                     <p className="text-sm text-slate-600">{faq.answer}</p>
                   </div>
                 )}

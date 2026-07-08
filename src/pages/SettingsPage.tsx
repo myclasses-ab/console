@@ -55,9 +55,9 @@ export default function SettingsPage() {
   };
 
   const Section = ({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) => (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 sm:p-6">
       <div className="flex items-center gap-2 mb-5">
-        <div className="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center">
+        <div className="w-8 h-8 rounded-lg bg-primary-50 flex items-center justify-center flex-shrink-0">
           <Icon size={18} className="text-primary-600" />
         </div>
         <h2 className="text-lg font-semibold text-slate-900">{title}</h2>

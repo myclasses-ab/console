@@ -4,6 +4,7 @@ import { branchApi } from '@/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
+import MobileListCard from '@/components/shared/MobileListCard';
 import { Plus, Pencil, Trash2, MapPin, Star } from 'lucide-react';
 import type { Branch } from '@/types';
 import { toast } from 'sonner';
@@ -113,14 +114,14 @@ export default function BranchesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Branches</h1>
           <p className="text-sm text-slate-500 mt-1">Manage your institute locations</p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors"
         >
           <Plus size={16} /> Add Branch
         </button>
@@ -144,7 +145,8 @@ export default function BranchesPage() {
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-          <div className="overflow-x-auto">
+          {/* Desktop table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm">
               <thead className="bg-slate-50 text-slate-500">
                 <tr>
@@ -193,6 +195,44 @@ export default function BranchesPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+          {/* Mobile cards */}
+          <div className="md:hidden divide-y divide-slate-100">
+            {branches.map((branch) => (
+              <MobileListCard
+                key={branch.identifier}
+                title={branch.name}
+                subtitle={
+                  <div className="space-y-0.5">
+                    <div>{branch.address}</div>
+                    <div className="text-xs text-slate-500">{branch.cityName}</div>
+                  </div>
+                }
+                badge={
+                  branch.isMainBranch ? (
+                    <span className="px-2 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700">Main Branch</span>
+                  ) : null
+                }
+                actions={
+                  <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); openEdit(branch); }}
+                      className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"
+                      aria-label="Edit branch"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setDeleteConfirm(branch); }}
+                      className="p-2 rounded-lg hover:bg-red-50 text-red-500"
+                      aria-label="Delete branch"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </>
+                }
+              />
+            ))}
           </div>
         </div>
       )}

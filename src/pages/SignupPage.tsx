@@ -84,7 +84,7 @@ export default function SignupPage() {
       {/* Right Side - Signup Form */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 bg-gradient-to-br from-slate-100 via-blue-50 to-indigo-100">
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
+          <div className="bg-white rounded-3xl shadow-xl border border-slate-100 p-6 sm:p-8">
             <div className="flex flex-col items-center mb-8">
               <div className="w-16 h-16 rounded-2xl bg-primary-600 flex items-center justify-center mb-4 shadow-lg shadow-primary-200">
                 <GraduationCap size={32} className="text-white" />

@@ -146,27 +146,27 @@ export default function CreditsPage() {
       <h1 className="text-2xl font-bold text-slate-900">Credits & Tokens</h1>
 
       {/* Balance Card */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl shadow-lg p-6 text-white">
-        <div className="flex items-center justify-between">
-          <div>
+      <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl shadow-lg p-5 sm:p-6 text-white">
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
             <p className="text-primary-100 text-sm font-medium">Your Credit Balance</p>
-            <p className="text-4xl font-bold mt-1">{balance.toLocaleString()}</p>
+            <p className="text-3xl sm:text-4xl font-bold mt-1">{balance.toLocaleString()}</p>
             <p className="text-primary-200 text-sm mt-1">credits available</p>
           </div>
-          <div className="w-16 h-16 rounded-2xl bg-white/20 flex items-center justify-center">
-            <Coins size={32} className="text-white" />
+          <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white/20 flex items-center justify-center flex-shrink-0">
+            <Coins size={28} className="sm:w-8 sm:h-8 text-white" />
           </div>
         </div>
-        <div className="flex gap-3 mt-6">
+        <div className="flex flex-col sm:flex-row gap-3 mt-6">
           <button
             onClick={() => setActiveSection('buy')}
-            className="px-4 py-2.5 rounded-xl bg-white text-primary-700 text-sm font-semibold hover:bg-primary-50 transition-colors flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-white text-primary-700 text-sm font-semibold hover:bg-primary-50 transition-colors flex items-center justify-center gap-2"
           >
             <IndianRupee size={16} /> Buy Credits
           </button>
           <button
             onClick={() => setActiveSection('featured')}
-            className="px-4 py-2.5 rounded-xl bg-white/20 text-white text-sm font-semibold hover:bg-white/30 transition-colors flex items-center gap-2"
+            className="px-4 py-2.5 rounded-xl bg-white/20 text-white text-sm font-semibold hover:bg-white/30 transition-colors flex items-center justify-center gap-2"
           >
             <Star size={16} /> Buy Featured
           </button>
@@ -175,19 +175,21 @@ export default function CreditsPage() {
 
       {/* Featured Status */}
       {activeFeatured && featuredExpiry && (
-        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-            <Star size={20} className="text-amber-600" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-amber-900">Featured Badge Active</p>
-            <p className="text-xs text-amber-700">
-              Expires on {featuredExpiry.toLocaleDateString()} ({Math.ceil((featuredExpiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left)
-            </p>
+        <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex items-center gap-3 flex-1">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <Star size={20} className="text-amber-600" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-amber-900">Featured Badge Active</p>
+              <p className="text-xs text-amber-700">
+                Expires on {featuredExpiry.toLocaleDateString()} ({Math.ceil((featuredExpiry.getTime() - Date.now()) / (1000 * 60 * 60 * 24))} days left)
+              </p>
+            </div>
           </div>
           <button
             onClick={() => setActiveSection('featured')}
-            className="px-3 py-1.5 rounded-lg bg-amber-200 text-amber-800 text-xs font-medium hover:bg-amber-300 transition-colors"
+            className="px-3 py-1.5 rounded-lg bg-amber-200 text-amber-800 text-xs font-medium hover:bg-amber-300 transition-colors w-full sm:w-auto"
           >
             Extend
           </button>
@@ -263,7 +265,7 @@ export default function CreditsPage() {
             ) : (
               <div className="space-y-2">
                 {topUps.map((tu) => (
-                  <div key={tu.identifier} className="flex items-center justify-between p-3 rounded-xl bg-slate-50">
+                  <div key={tu.identifier} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-slate-50">
                     <div>
                       <p className="text-sm font-medium text-slate-900">{tu.requestedCredits} credits</p>
                       <p className="text-xs text-slate-500">₹{tu.amountInRupees.toLocaleString()} • TXN: ...{tu.transactionIdLast6}</p>
@@ -291,7 +293,7 @@ export default function CreditsPage() {
           </div>
 
           <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl p-5 border border-amber-200">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <p className="text-lg font-bold text-amber-900">30 Days Featured</p>
                 <p className="text-sm text-amber-700 mt-1">Your institute will appear at the top of search results</p>
@@ -307,7 +309,7 @@ export default function CreditsPage() {
                   </li>
                 </ul>
               </div>
-              <div className="text-right">
+              <div className="text-left sm:text-right flex-shrink-0">
                 <p className="text-3xl font-bold text-amber-900">{FEATURED_COST}</p>
                 <p className="text-sm text-amber-700">credits</p>
               </div>
@@ -324,7 +326,7 @@ export default function CreditsPage() {
             </div>
           )}
 
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => setActiveSection('overview')}
               className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
@@ -348,7 +350,7 @@ export default function CreditsPage() {
             ) : (
               <div className="space-y-2">
                 {featuredPurchases.map((fp) => (
-                  <div key={fp.identifier} className="flex items-center justify-between p-3 rounded-xl bg-slate-50">
+                  <div key={fp.identifier} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 rounded-xl bg-slate-50">
                     <div>
                       <p className="text-sm font-medium text-slate-900">{fp.durationDays} days</p>
                       <p className="text-xs text-slate-500">Cost: {fp.cost} credits</p>
@@ -404,17 +406,17 @@ export default function CreditsPage() {
             ) : (
               <div className="space-y-2 max-h-80 overflow-y-auto">
                 {transactions.map((txn) => (
-                  <div key={txn.identifier} className="flex items-center justify-between p-3 rounded-xl bg-slate-50">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${txn.amount > 0 ? 'bg-green-100' : 'bg-red-100'}`}>
+                  <div key={txn.identifier} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${txn.amount > 0 ? 'bg-green-100' : 'bg-red-100'}`}>
                         {txn.amount > 0 ? <ArrowRight size={14} className="text-green-600 rotate-[-45deg]" /> : <ArrowRight size={14} className="text-red-600 rotate-[135deg]" />}
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-slate-900">{TRANSACTION_LABELS[txn.type] || txn.description || txn.type}</p>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-slate-900 truncate">{TRANSACTION_LABELS[txn.type] || txn.description || txn.type}</p>
                         <p className="text-xs text-slate-500">{new Date(txn.createdAt).toLocaleString()}</p>
                       </div>
                     </div>
-                    <span className={`text-sm font-bold ${txn.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <span className={`text-sm font-bold flex-shrink-0 ${txn.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
                       {txn.amount > 0 ? '+' : ''}{txn.amount}
                     </span>
                   </div>

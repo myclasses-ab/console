@@ -74,8 +74,8 @@ export default function TopHeader() {
   return (
     <header
       className={cn(
-        'fixed top-0 right-0 z-30 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 transition-all duration-300',
-        sidebarCollapsed ? 'left-16' : 'left-64'
+        'fixed top-0 right-0 z-30 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 transition-all duration-300 left-0',
+        sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'
       )}
     >
       <div className="flex items-center gap-3">
@@ -86,7 +86,7 @@ export default function TopHeader() {
           <Menu size={20} />
         </button>
         <div>
-          <h1 className="text-sm font-semibold text-slate-900 truncate max-w-[200px] sm:max-w-md">
+          <h1 className="text-sm font-semibold text-slate-900 truncate max-w-[140px] xs:max-w-[200px] sm:max-w-md">
             {institute?.name || 'Institute Console'}
           </h1>
           <p className="text-xs text-slate-500 hidden sm:block">
@@ -119,7 +119,7 @@ export default function TopHeader() {
                 className="fixed inset-0 z-10"
                 onClick={closeAllDropdowns}
               />
-              <div className="absolute right-0 top-full mt-1 w-80 sm:w-96 bg-white rounded-xl border border-slate-200 shadow-lg z-20 py-2 max-h-[28rem] flex flex-col">
+              <div className="absolute right-0 top-full mt-1 w-[calc(100vw-2rem)] max-w-sm sm:w-96 bg-white rounded-xl border border-slate-200 shadow-lg z-20 py-2 max-h-[28rem] flex flex-col">
                 <div className="px-4 py-2 border-b border-slate-100">
                   <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
                 </div>

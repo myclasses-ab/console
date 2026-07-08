@@ -52,13 +52,13 @@ function SectionCard({
       transition={{ duration: 0.35 }}
       className={`bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden ${className}`}
     >
-      <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-primary-50 flex items-center justify-center shadow-sm">
+      <div className="px-4 sm:px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex items-center gap-3">
+        <div className="w-9 h-9 rounded-xl bg-primary-50 flex items-center justify-center shadow-sm flex-shrink-0">
           <Icon size={18} className="text-primary-600" />
         </div>
         <h2 className="text-base font-semibold text-slate-900">{title}</h2>
       </div>
-      <div className="p-6">{children}</div>
+      <div className="p-4 sm:p-6">{children}</div>
     </motion.div>
   );
 }
@@ -196,7 +196,7 @@ function ImageUploader({
     [onFileSelect]
   );
 
-  const sizeClasses = aspect === "wide" ? "h-48" : "h-40 w-40";
+  const sizeClasses = aspect === "wide" ? "h-48" : "h-40 w-full";
 
   return (
     <div>
@@ -208,13 +208,13 @@ function ImageUploader({
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         onClick={() => inputRef.current?.click()}
-        className={`relative group cursor-pointer rounded-2xl border-2 border-dashed transition-all overflow-hidden ${
+        className={`relative group cursor-pointer rounded-2xl border-2 border-dashed transition-all overflow-hidden max-w-full ${
           isDragging
             ? "border-primary-500 bg-primary-50"
             : previewUrl
             ? "border-slate-200 hover:border-primary-400"
             : "border-slate-300 hover:border-primary-400 bg-slate-50/50"
-        } ${aspect === "wide" ? "w-full" : "w-40"}`}
+        } ${aspect === "wide" ? "w-full" : "w-full sm:w-40"}`}
       >
         <div className={`${sizeClasses} relative`}>
           {previewUrl ? (
@@ -303,7 +303,7 @@ function InstitutePreview({ institute }: { institute: any }) {
                 {institute.name || "Institute Name"}
               </h3>
               {institute.tagline && (
-                <p className="text-white/90 text-xs truncate max-w-[180px] drop-shadow">
+                <p className="text-white/90 text-xs truncate max-w-[120px] sm:max-w-[180px] drop-shadow">
                   {institute.tagline}
                 </p>
               )}
@@ -314,7 +314,7 @@ function InstitutePreview({ institute }: { institute: any }) {
 
       {/* Info */}
       <div className="pt-6 px-4 pb-4">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
           <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-full">
             <Star size={12} className="text-amber-500 fill-amber-500" />
             <span className="text-xs font-bold text-amber-700">{rating}</span>
@@ -495,17 +495,17 @@ export default function InstituteProfilePage() {
   return (
     <div className="min-h-[calc(100vh-4rem)]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Institute Profile</h1>
           <p className="text-sm text-slate-500 mt-0.5">
             Manage your institute information and preview how students see it
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             onClick={() => setShowPreviewModal(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold hover:bg-slate-50 transition-colors shadow-sm"
           >
             <Eye size={16} />
             Preview
@@ -513,7 +513,7 @@ export default function InstituteProfilePage() {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 shadow-sm"
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 shadow-sm"
           >
             <Save size={16} />
             {isSaving ? "Saving..." : "Save Changes"}
@@ -522,8 +522,8 @@ export default function InstituteProfilePage() {
       </div>
 
       {/* Completion bar */}
-      <div className="mb-6 bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4 shadow-sm">
-        <div className="flex-1">
+      <div className="mb-6 bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-3 sm:gap-4 shadow-sm">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-sm font-semibold text-slate-800">Profile Completion</span>
             <span className="text-sm font-bold text-primary-600">{completionPercent}%</span>
@@ -742,7 +742,7 @@ export default function InstituteProfilePage() {
 
         {/* ── Right Column: Sticky Sidebar ── */}
         <div className="xl:col-span-1">
-          <div className="sticky top-4 space-y-5">
+          <div className="xl:sticky xl:top-4 space-y-5">
             <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -777,7 +777,7 @@ export default function InstituteProfilePage() {
       </div>
 
       {/* ── Sticky Save Bar ── */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-slate-200/80 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+      <div className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom))] lg:bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-slate-200/80 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center">

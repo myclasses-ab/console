@@ -109,7 +109,7 @@ export default function SubscriptionPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div className="bg-slate-50 rounded-xl p-4">
               <p className="text-xs text-slate-500 mb-1">Start Date</p>
               <p className="text-sm font-medium text-slate-900">
@@ -141,7 +141,7 @@ export default function SubscriptionPage() {
         </div>
 
         {/* Usage Stats */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 sm:p-6">
           <h2 className="text-lg font-semibold text-slate-900 mb-5">Usage</h2>
           <div className="space-y-5">
             {usageItems.map((item) => {
