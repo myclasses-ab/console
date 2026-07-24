@@ -116,7 +116,9 @@ export default function ResultsPage() {
       if (isEditMode) {
         await resultApi.update(editingResult.identifier!, editingResult);
       } else {
-        await resultApi.create(editingResult as Omit<Result, 'identifier'>);
+        // The backend generates the identifier; keep the temp id only for uploads.
+        const { identifier, ...createPayload } = editingResult;
+        await resultApi.create(createPayload as Omit<Result, 'identifier'>);
       }
       await loadData();
       toast.success('Saved successfully');
