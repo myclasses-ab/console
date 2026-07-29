@@ -1,1 +1,1 @@
-# console-myclasses
+# console-myclasses yes
