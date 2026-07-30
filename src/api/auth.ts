@@ -22,6 +22,27 @@ export interface SignupRequest {
   email: string;
   password: string;
   instituteName: string;
+  phone: string;
+}
+
+export interface InstituteSignupInitiateRequest {
+  email: string;
+  phone: string;
+  password: string;
+  instituteName: string;
+}
+
+export interface InstituteSignupInitiateResponse {
+  message: string;
+  email: string;
+  phone: string;
+  expiresInMinutes: number;
+}
+
+export interface InstituteSignupVerifyResponse {
+  message: string;
+  emailVerified: boolean;
+  phoneVerified?: boolean;
 }
 
 export interface AuthResponse {
@@ -51,6 +72,65 @@ export const authApi = {
    */
   signup: async (data: SignupRequest): Promise<AuthResponse> => {
     const response = await axios.post<AuthResponse>('/auth/signup', data);
+    return response.data;
+  },
+
+  /**
+   * Initiate institute signup: sends email code + phone OTP
+   */
+  initiateInstituteSignup: async (
+    data: InstituteSignupInitiateRequest
+  ): Promise<InstituteSignupInitiateResponse> => {
+    const response = await axios.post<InstituteSignupInitiateResponse>('/auth/signup/initiate', data);
+    return response.data;
+  },
+
+  /**
+   * Verify email code for institute signup
+   */
+  verifySignupEmail: async (email: string, code: string): Promise<InstituteSignupVerifyResponse> => {
+    const response = await axios.post<InstituteSignupVerifyResponse>('/auth/signup/verify-email', {
+      email,
+      code,
+    });
+    return response.data;
+  },
+
+  /**
+   * Send phone OTP for institute signup after email is verified
+   */
+  sendSignupPhoneOtp: async (email: string): Promise<{ message: string; phone: string; expiresInMinutes: number }> => {
+    const response = await axios.post<{ message: string; phone: string; expiresInMinutes: number }>(
+      '/auth/signup/send-phone-otp',
+      { email }
+    );
+    return response.data;
+  },
+
+  /**
+   * Verify phone OTP for institute signup
+   */
+  verifySignupPhone: async (email: string, otp: string): Promise<InstituteSignupVerifyResponse> => {
+    const response = await axios.post<InstituteSignupVerifyResponse>('/auth/signup/verify-phone', {
+      email,
+      otp,
+    });
+    return response.data;
+  },
+
+  /**
+   * Resend email verification code
+   */
+  resendSignupEmail: async (email: string): Promise<{ message: string }> => {
+    const response = await axios.post<{ message: string }>('/auth/signup/resend-email', { email });
+    return response.data;
+  },
+
+  /**
+   * Resend phone OTP
+   */
+  resendSignupPhone: async (email: string): Promise<{ message: string }> => {
+    const response = await axios.post<{ message: string }>('/auth/signup/resend-phone', { email });
     return response.data;
   },
 

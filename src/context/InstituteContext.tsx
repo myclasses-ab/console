@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import { instituteApi, userInstituteAssociationApi } from '@/api';
-import { useAuth } from './AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import type { Institute, UserInstituteAssociation } from '@/types';
 
 interface InstituteContextType {

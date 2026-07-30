@@ -1,5 +1,6 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useEffect, useState, type ReactNode } from 'react';
 import { authApi } from '@/api';
+import type { AuthResponse } from '@/api/auth';
 import type { User } from '@/types';
 
 interface AuthContextType {
@@ -8,32 +9,46 @@ interface AuthContextType {
   isLoading: boolean;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, instituteName: string) => Promise<void>;
+  signup: (email: string, password: string, instituteName: string, phone: string) => Promise<void>;
+  completeSignup: (response: AuthResponse) => void;
   logout: () => void;
 }
 
-const AuthContext = createContext<AuthContextType | null>(null);
+export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState<string | null>(() =>
+    typeof window !== 'undefined' ? localStorage.getItem('authToken') : null
+  );
+  const [isLoading, setIsLoading] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !!localStorage.getItem('authToken');
+  });
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('authToken');
-    if (storedToken) {
-      setToken(storedToken);
-      authApi
-        .me()
-        .then((u) => setUser(u))
-        .catch(() => {
+    const storedToken = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    if (!storedToken) return;
+
+    let cancelled = false;
+    authApi
+      .me()
+      .then((u) => {
+        if (!cancelled) setUser(u);
+      })
+      .catch(() => {
+        if (!cancelled) {
           localStorage.removeItem('authToken');
           setToken(null);
-        })
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
-    }
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
@@ -43,8 +58,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(response.user);
   };
 
-  const signup = async (email: string, password: string, instituteName: string) => {
-    const response = await authApi.signup({ email, password, instituteName });
+  const signup = async (email: string, password: string, instituteName: string, phone: string) => {
+    const response = await authApi.signup({ email, password, instituteName, phone });
+    localStorage.setItem('authToken', response.token);
+    setToken(response.token);
+    setUser(response.user);
+  };
+
+  const completeSignup = (response: AuthResponse) => {
     localStorage.setItem('authToken', response.token);
     setToken(response.token);
     setUser(response.user);
@@ -66,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user && !!token,
         login,
         signup,
+        completeSignup,
         logout,
       }}
     >
@@ -74,10 +96,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
-}
+

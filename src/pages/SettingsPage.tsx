@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useInstitute } from '@/context/InstituteContext';
 import { userApi } from '@/api';
 import { Save, User, Lock, Building2 } from 'lucide-react';

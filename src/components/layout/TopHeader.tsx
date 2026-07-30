@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import { useInstitute } from '@/context/InstituteContext';
 import { useNotifications } from '@/context/NotificationContext';
 import { useUIStore } from '@/store/uiStore';

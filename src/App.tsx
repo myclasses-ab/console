@@ -3,7 +3,7 @@ import { Toaster } from 'sonner';
 import { AuthProvider } from '@/context/AuthContext';
 import { InstituteProvider } from '@/context/InstituteContext';
 import { NotificationProvider } from '@/context/NotificationContext';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import AppShell from '@/components/layout/AppShell';
 import PageTransition from '@/components/layout/PageTransition';
 import LoginPage from '@/pages/LoginPage';

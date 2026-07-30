@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { notificationApi } from '@/api';
-import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import type { Notification } from '@/types';
 
 interface NotificationContextType {
