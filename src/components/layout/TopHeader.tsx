@@ -4,6 +4,7 @@ import { useInstitute } from '@/context/InstituteContext';
 import { useNotifications } from '@/context/NotificationContext';
 import { useUIStore } from '@/store/uiStore';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.svg';
 import {
   Bell,
   LogOut,
@@ -85,8 +86,13 @@ export default function TopHeader() {
         >
           <Menu size={20} />
         </button>
+        <img
+          src={logo}
+          alt="MyClasses"
+          className="h-8 w-auto object-contain"
+        />
         <div>
-          <h1 className="text-sm font-semibold text-slate-900 truncate max-w-[140px] xs:max-w-[200px] sm:max-w-md">
+          <h1 className="text-sm font-semibold text-slate-900 truncate max-w-[120px] xs:max-w-[180px] sm:max-w-md">
             {institute?.name || 'Institute Console'}
           </h1>
           <p className="text-xs text-slate-500 hidden sm:block">
