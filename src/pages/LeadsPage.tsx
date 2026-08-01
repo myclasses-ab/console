@@ -49,10 +49,10 @@ export default function LeadsPage() {
   const [unlockingId, setUnlockingId] = useState<string | null>(null);
   const [creditBalance, setCreditBalance] = useState<number>(0);
 
-  const loadData = async () => {
+  const loadData = async (): Promise<Inquiry[]> => {
     if (!institute?.identifier) {
       setIsLoading(false);
-      return;
+      return [];
     }
     setIsLoading(true);
     try {
@@ -63,9 +63,11 @@ export default function LeadsPage() {
       setInquiries(data);
       setFilteredInquiries(data);
       setCreditBalance(credit?.balance ?? 0);
+      return data;
     } catch (err) {
       console.error('Failed to load leads', err);
       toast.error('Failed to load leads');
+      return [];
     } finally {
       setIsLoading(false);
     }
@@ -94,9 +96,11 @@ export default function LeadsPage() {
     try {
       await inquiryApi.update(selectedInquiry.identifier, { status: newStatus });
       toast.success(`Status updated to ${newStatus}`);
-      await loadData();
-      const updated = { ...selectedInquiry, status: newStatus };
-      setSelectedInquiry(updated);
+      const refreshed = await loadData();
+      const updated = refreshed.find((i) => i.identifier === selectedInquiry.identifier);
+      if (updated) {
+        setSelectedInquiry(updated);
+      }
     } catch (err) {
       console.error('Failed to update status', err);
       toast.error('Failed to update status');
@@ -111,8 +115,11 @@ export default function LeadsPage() {
     try {
       await inquiryApi.update(selectedInquiry.identifier, { instituteNotes: notes });
       toast.success('Notes saved');
-      await loadData();
-      setSelectedInquiry((prev: Inquiry | null) => (prev ? { ...prev, instituteNotes: notes } : null));
+      const refreshed = await loadData();
+      const updated = refreshed.find((i) => i.identifier === selectedInquiry.identifier);
+      if (updated) {
+        setSelectedInquiry(updated);
+      }
     } catch (err) {
       console.error('Failed to save notes', err);
       toast.error('Failed to save notes');
@@ -131,9 +138,10 @@ export default function LeadsPage() {
     try {
       await inquiryApi.unlock(inquiry.identifier, institute.identifier);
       toast.success('Contact details unlocked');
-      await loadData();
-      if (selectedInquiry?.identifier === inquiry.identifier) {
-        setSelectedInquiry((prev) => (prev ? { ...prev, contactUnlocked: true } : null));
+      const refreshed = await loadData();
+      const updated = refreshed.find((i) => i.identifier === inquiry.identifier);
+      if (updated) {
+        setSelectedInquiry(updated);
       }
     } catch (err: any) {
       toast.error(err?.response?.data?.error || 'Failed to unlock contact details');

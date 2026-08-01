@@ -59,7 +59,7 @@ const navSections: NavSection[] = [
     title: 'Account',
     items: [
       { label: 'Credits', icon: Coins, path: '/credits' },
-      { label: 'Subscription', icon: CreditCard, path: '/subscription' },
+      // { label: 'Subscription', icon: CreditCard, path: '/subscription' },
       { label: 'Settings', icon: Settings, path: '/settings' },
     ],
   },

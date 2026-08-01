@@ -27,7 +27,7 @@ const moreItems = [
   { label: 'My Leads', path: '/leads' },
   { label: 'FAQs', path: '/faqs' },
   { label: 'Facilities', path: '/facilities' },
-  { label: 'Subscription', path: '/subscription' },
+  // { label: 'Subscription', path: '/subscription' },
   { label: 'Settings', path: '/settings' },
 ];
 

@@ -76,7 +76,7 @@ export default function TopHeader() {
     <header
       className={cn(
         'fixed top-0 right-0 z-30 h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 transition-all duration-300 left-0',
-        sidebarCollapsed ? 'lg:left-20' : 'lg:left-72'
+        sidebarCollapsed ? 'lg:left-18' : 'lg:left-64'
       )}
     >
       <div className="flex items-center gap-3">

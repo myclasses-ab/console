@@ -20,6 +20,7 @@ export interface User {
   role: UserRole;
   currentStandard: Standard;
   targetExamIdentifiers: string[];
+  bookedDemoCourseIdentifiers?: string[];
   cityIdentifier: string;
   state: string;
   pincode: string;
