@@ -19,7 +19,7 @@ const emptyCourse: Partial<InstituteCourse> = {
   studyMaterialIncluded: false,
   testSeriesIncluded: false,
   recordedLecturesAvailable: false,
-  admissionOpen: false,
+  admissionOpen: true,
 };
 
 export default function CoursesPage() {
