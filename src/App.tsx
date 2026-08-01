@@ -8,6 +8,7 @@ import AppShell from '@/components/layout/AppShell';
 import PageTransition from '@/components/layout/PageTransition';
 import LoginPage from '@/pages/LoginPage';
 import SignupPage from '@/pages/SignupPage';
+import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
 import DashboardPage from '@/pages/DashboardPage';
 import InstituteProfilePage from '@/pages/InstituteProfilePage';
 import BranchesPage from '@/pages/BranchesPage';
@@ -45,6 +46,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route
         path="/"
         element={

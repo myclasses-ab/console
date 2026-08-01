@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useInstitute } from '@/context/InstituteContext';
-import { userApi } from '@/api';
+import { userApi, authApi } from '@/api';
 import { Save, User, Lock, Building2 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -49,6 +49,14 @@ export default function SettingsPage() {
   };
 
   const handlePasswordChange = async () => {
+    if (!passwordForm.current || !passwordForm.new || !passwordForm.confirm) {
+      setMessage('Please fill in all password fields');
+      return;
+    }
+    if (passwordForm.new.length < 6) {
+      setMessage('New password must be at least 6 characters');
+      return;
+    }
     if (passwordForm.new !== passwordForm.confirm) {
       setMessage('New passwords do not match');
       return;
@@ -56,11 +64,19 @@ export default function SettingsPage() {
     setIsSaving(true);
     setMessage('');
     try {
-      // Note: Backend doesn't have a dedicated password change endpoint yet
-      // This would need to be implemented
-      setMessage('Password change endpoint not yet implemented');
-    } catch (err) {
-      setMessage('Failed to change password');
+      await authApi.changePassword({
+        currentPassword: passwordForm.current,
+        newPassword: passwordForm.new,
+      });
+      setPasswordForm({ current: '', new: '', confirm: '' });
+      toast.success('Password changed successfully!');
+    } catch (err: unknown) {
+      if (typeof err === 'object' && err !== null && 'response' in err) {
+        const axiosErr = err as { response?: { data?: { error?: string } } };
+        setMessage(axiosErr.response?.data?.error || 'Failed to change password');
+      } else {
+        setMessage('Failed to change password');
+      }
     } finally {
       setIsSaving(false);
     }

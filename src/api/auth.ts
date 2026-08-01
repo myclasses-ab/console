@@ -45,6 +45,30 @@ export interface InstituteSignupVerifyResponse {
   phoneVerified?: boolean;
 }
 
+export interface ForgotPasswordOtpResponse {
+  message: string;
+  email: string;
+  expiresInMinutes: number;
+}
+
+export interface ForgotPasswordVerifyResponse {
+  message: string;
+  verified: boolean;
+}
+
+export interface ForgotPasswordResetResponse {
+  message: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResponse {
+  message: string;
+}
+
 export interface AuthResponse {
   token: string;
   user: User;
@@ -147,6 +171,64 @@ export const authApi = {
    */
   refresh: async (): Promise<AuthResponse> => {
     const response = await axios.post<AuthResponse>('/auth/refresh');
+    return response.data;
+  },
+
+  /**
+   * Send password reset OTP to email
+   */
+  sendForgotPasswordOtp: async (email: string): Promise<ForgotPasswordOtpResponse> => {
+    const response = await axios.post<ForgotPasswordOtpResponse>('/auth/forgot-password/send-otp', {
+      email,
+    });
+    return response.data;
+  },
+
+  /**
+   * Resend password reset OTP to email
+   */
+  resendForgotPasswordOtp: async (email: string): Promise<ForgotPasswordOtpResponse> => {
+    const response = await axios.post<ForgotPasswordOtpResponse>('/auth/forgot-password/resend-otp', {
+      email,
+    });
+    return response.data;
+  },
+
+  /**
+   * Verify password reset OTP
+   */
+  verifyForgotPasswordOtp: async (
+    email: string,
+    code: string
+  ): Promise<ForgotPasswordVerifyResponse> => {
+    const response = await axios.post<ForgotPasswordVerifyResponse>('/auth/forgot-password/verify-otp', {
+      email,
+      code,
+    });
+    return response.data;
+  },
+
+  /**
+   * Reset password using OTP
+   */
+  resetPassword: async (
+    email: string,
+    code: string,
+    newPassword: string
+  ): Promise<ForgotPasswordResetResponse> => {
+    const response = await axios.post<ForgotPasswordResetResponse>('/auth/forgot-password/reset', {
+      email,
+      code,
+      newPassword,
+    });
+    return response.data;
+  },
+
+  /**
+   * Change password for authenticated user
+   */
+  changePassword: async (data: ChangePasswordRequest): Promise<ChangePasswordResponse> => {
+    const response = await axios.post<ChangePasswordResponse>('/auth/change-password', data);
     return response.data;
   },
 };
