@@ -259,7 +259,7 @@ function ImageUploader({
       {previewUrl && (
         <button
           onClick={(e) => { e.stopPropagation(); onClear(); }}
-          className="mt-2 text-xs text-red-500 hover:text-red-600 font-medium flex items-center gap-1 transition-colors"
+          className="mt-2 text-xs text-red-500 hover:text-red-600 font-medium flex items-center gap-1 transition-colors cursor-pointer"
         >
           <X size={12} />
           Remove {label}
@@ -724,10 +724,6 @@ export default function InstituteProfilePage() {
           {/* Statistics (read-only) */}
           <SectionCard title="Statistics" icon={BarChart3}>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
-                <p className="text-xs text-slate-500 mb-1">Total Students</p>
-                <p className="text-lg font-bold text-slate-900">{formData["totalStudentsEnrolled"] || 0}</p>
-              </div>
               <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
                 <p className="text-xs text-slate-500 mb-1">Verified</p>
                 <p className="text-lg font-bold text-slate-900">{institute.isVerified ? "Yes" : "No"}</p>

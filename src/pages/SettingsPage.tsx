@@ -82,7 +82,7 @@ export default function SettingsPage() {
       <Section title="Profile" icon={User}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">User Name</label>
             <input
               value={profileForm.fullName}
               onChange={(e) => setProfileForm((prev) => ({ ...prev, fullName: e.target.value }))}
@@ -159,21 +159,6 @@ export default function SettingsPage() {
             <Lock size={16} />
             {isSaving ? 'Updating...' : 'Change Password'}
           </button>
-        </div>
-      </Section>
-
-      <Section title="Institute Association" icon={Building2}>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between py-2 border-b border-slate-100">
-            <span className="text-sm text-slate-500">Role</span>
-            <span className="text-sm font-medium text-slate-900">{association?.role || 'N/A'}</span>
-          </div>
-          <div className="flex items-center justify-between py-2 border-b border-slate-100">
-            <span className="text-sm text-slate-500">Status</span>
-            <span className={`text-sm font-medium ${association?.isActive ? 'text-green-600' : 'text-red-600'}`}>
-              {association?.isActive ? 'Active' : 'Inactive'}
-            </span>
-          </div>
         </div>
       </Section>
     </div>

@@ -49,7 +49,7 @@ import {
   Bookmark,
   AlertCircle,
 } from 'lucide-react';
-import { instituteLogoUrl, instituteBannerUrl, facultyImageUrl } from '@/lib/image-url';
+import { instituteLogoUrl, instituteBannerUrl, facultyImageUrl, studentImageUrl } from '@/lib/image-url';
 import {
   branchApi,
   instituteFacilityApi,
@@ -1014,7 +1014,7 @@ function ResultsCarousel({
               <div className="relative flex-shrink-0">
                 <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full border-4 border-amber-200 overflow-hidden bg-white shadow-lg">
                   <img
-                    src={currentResult.studentPhotoUrl || getPlaceholderImage()}
+                    src={studentImageUrl(currentResult.studentPhotoUrl) || getPlaceholderImage()}
                     alt={currentResult.studentName}
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -1096,7 +1096,7 @@ function ResultCard({ result, index }: { result: Result; index?: number }) {
           <div className="relative flex-shrink-0">
             <div className="relative w-16 h-16 rounded-full overflow-hidden bg-slate-100 border-2 border-slate-200 group-hover:border-primary-300 transition-colors">
               <img
-                src={result.studentPhotoUrl || getPlaceholderImage()}
+                src={studentImageUrl(result.studentPhotoUrl) || getPlaceholderImage()}
                 alt={result.studentName}
                 className="w-full h-full object-cover"
                 onError={(e) => {

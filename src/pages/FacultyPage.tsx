@@ -288,14 +288,14 @@ export default function FacultyPage() {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">Photo</label>
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     value={editingFaculty.photoUrl || ''}
                     onChange={(e) => handleChange('photoUrl', e.target.value)}
                     placeholder="Photo URL or upload below"
                     className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                   />
-                  <label className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 cursor-pointer transition-colors">
+                  <label className="flex items-center justify-center sm:justify-start gap-2 px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-medium hover:bg-slate-200 cursor-pointer transition-colors whitespace-nowrap w-full sm:w-auto">
                     <Upload size={16} />
                     {isUploading ? 'Uploading...' : 'Upload'}
                     <input
