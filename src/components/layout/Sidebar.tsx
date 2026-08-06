@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/store/uiStore';
 import { useSetupStatus, type SetupStep } from '@/hooks/useSetupStatus';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.svg';
 import {
   LayoutDashboard,
   Building2,
@@ -105,7 +106,7 @@ export default function Sidebar() {
       >
         <div className="flex items-center gap-2.5 overflow-hidden">
           <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center shadow-lg shadow-primary-500/25">
-            <GraduationCap size={18} className="text-white" />
+            <img src={logo} alt="MyClasses" className="h-8 w-auto object-contain rounded-lg" />
           </div>
           {!sidebarCollapsed && (
             <span className="text-base font-bold text-slate-100 truncate tracking-tight">
