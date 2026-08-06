@@ -1,14 +1,37 @@
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useInstitute } from '@/context/InstituteContext';
 import { branchApi } from '@/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import MobileListCard from '@/components/shared/MobileListCard';
-import { Plus, Pencil, Trash2, MapPin, Star, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, MapPin, Star, X, ArrowRight } from 'lucide-react';
 import { CITIES } from '@/components/helper/cities';
 import type { Branch } from '@/types';
 import { toast } from 'sonner';
+
+function toTitleCase(str: string): string {
+  if (!str) return str;
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase());
+}
+
+function isGoogleMapsUrl(url: string): boolean {
+  if (!url?.trim()) return false;
+  const trimmed = url.trim().toLowerCase();
+  if (!trimmed.startsWith('https://')) return false;
+  try {
+    const { hostname, pathname } = new URL(trimmed);
+    return (
+      hostname === 'maps.google.com' ||
+      hostname === 'maps.app.goo.gl' ||
+      (hostname === 'goo.gl' && pathname.startsWith('/maps')) ||
+      (hostname.endsWith('.google.com') && pathname.startsWith('/maps'))
+    );
+  } catch {
+    return false;
+  }
+}
 
 const emptyBranch: Partial<Branch> = {
   name: '',
@@ -31,6 +54,7 @@ const emptyBranch: Partial<Branch> = {
 };
 
 export default function BranchesPage() {
+  const navigate = useNavigate();
   const { institute } = useInstitute();
   const [branches, setBranches] = useState<Branch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -86,6 +110,10 @@ export default function BranchesPage() {
     if (!editingBranch) return;
     if (!editingBranch.googleMapsUrl?.trim()) {
       toast.error('Google Maps URL is required');
+      return;
+    }
+    if (!isGoogleMapsUrl(editingBranch.googleMapsUrl)) {
+      toast.error('Please enter a valid Google Maps URL (e.g. https://maps.google.com/...)');
       return;
     }
     setIsSaving(true);
@@ -232,14 +260,14 @@ export default function BranchesPage() {
                   <tr key={branch.identifier} className="hover:bg-slate-50">
                     <td className="px-5 py-3 font-medium text-slate-900">
                       <div className="flex items-center gap-2">
-                        {branch.name}
+                        {toTitleCase(branch.name)}
                         {branch.isMainBranch && <Star size={14} className="text-amber-500 fill-amber-500" />}
                       </div>
                     </td>
                     <td className="px-5 py-3 text-slate-600">
                       {branch.serviceCities && branch.serviceCities.length > 0 ? (
                         <div className="flex flex-wrap items-center gap-1">
-                          <span>{branch.serviceCities[0]}</span>
+                          <span>{toTitleCase(branch.serviceCities[0])}</span>
                           {branch.serviceCities.length > 1 && (
                             <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
                               +{branch.serviceCities.length - 1} more
@@ -247,7 +275,7 @@ export default function BranchesPage() {
                           )}
                         </div>
                       ) : (
-                        branch.cityName || '-'
+                        toTitleCase(branch.cityName) || '-'
                       )}
                     </td>
                     <td className="px-5 py-3 text-slate-600 max-w-xs truncate">{branch.address}</td>
@@ -284,14 +312,14 @@ export default function BranchesPage() {
             {branches.map((branch) => (
               <MobileListCard
                 key={branch.identifier}
-                title={branch.name}
+                title={toTitleCase(branch.name)}
                 subtitle={
                   <div className="space-y-0.5">
                     <div>{branch.address}</div>
                     <div className="text-xs text-slate-500">
                       {branch.serviceCities && branch.serviceCities.length > 0
-                        ? `${branch.serviceCities[0]}${branch.serviceCities.length > 1 ? ` +${branch.serviceCities.length - 1}` : ''}`
-                        : branch.cityName || '-'}
+                        ? `${toTitleCase(branch.serviceCities[0])}${branch.serviceCities.length > 1 ? ` +${branch.serviceCities.length - 1}` : ''}`
+                        : toTitleCase(branch.cityName) || '-'}
                     </div>
                   </div>
                 }
@@ -321,6 +349,18 @@ export default function BranchesPage() {
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {branches.length > 0 && (
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={() => navigate('/courses')}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm"
+          >
+            Next: Courses
+            <ArrowRight size={16} />
+          </button>
         </div>
       )}
 

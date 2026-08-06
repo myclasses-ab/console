@@ -32,6 +32,7 @@ export interface Inquiry {
   studentName?: string;
   studentPhone?: string;
   courseName?: string;
+  courseFee?: number | string | null;
   contactUnlocked?: boolean;
   unlockedAt?: string | null;
   unlockedBy?: string | null;

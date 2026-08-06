@@ -6,6 +6,7 @@ import { NotificationProvider } from '@/context/NotificationContext';
 import { useAuth } from '@/hooks/useAuth';
 import AppShell from '@/components/layout/AppShell';
 import PageTransition from '@/components/layout/PageTransition';
+import LockedPageGate from '@/components/setup/LockedPageGate';
 import LoginPage from '@/pages/LoginPage';
 import SignupPage from '@/pages/SignupPage';
 import ForgotPasswordPage from '@/pages/ForgotPasswordPage';
@@ -19,6 +20,7 @@ import ReviewsPage from '@/pages/ReviewsPage';
 import LeadsPage from '@/pages/LeadsPage';
 import FaqsPage from '@/pages/FaqsPage';
 import FacilitiesPage from '@/pages/FacilitiesPage';
+import MediaPage from '@/pages/MediaPage';
 import SubscriptionPage from '@/pages/SubscriptionPage';
 import SettingsPage from '@/pages/SettingsPage';
 import CreditsPage from '@/pages/CreditsPage';
@@ -57,14 +59,15 @@ function AppRoutes() {
       >
         <Route index element={<PageTransition><DashboardPage /></PageTransition>} />
         <Route path="profile" element={<PageTransition><InstituteProfilePage /></PageTransition>} />
-        <Route path="branches" element={<PageTransition><BranchesPage /></PageTransition>} />
-        <Route path="courses" element={<PageTransition><CoursesPage /></PageTransition>} />
-        <Route path="faculty" element={<PageTransition><FacultyPage /></PageTransition>} />
+        <Route path="branches" element={<PageTransition><LockedPageGate requiredStep="branches"><BranchesPage /></LockedPageGate></PageTransition>} />
+        <Route path="courses" element={<PageTransition><LockedPageGate requiredStep="courses"><CoursesPage /></LockedPageGate></PageTransition>} />
+        <Route path="faculty" element={<PageTransition><LockedPageGate requiredStep="faculty"><FacultyPage /></LockedPageGate></PageTransition>} />
         <Route path="results" element={<PageTransition><ResultsPage /></PageTransition>} />
         <Route path="reviews" element={<PageTransition><ReviewsPage /></PageTransition>} />
         <Route path="leads" element={<PageTransition><LeadsPage /></PageTransition>} />
         <Route path="faqs" element={<PageTransition><FaqsPage /></PageTransition>} />
-        <Route path="facilities" element={<PageTransition><FacilitiesPage /></PageTransition>} />
+        <Route path="facilities" element={<PageTransition><LockedPageGate requiredStep="faculty"><FacilitiesPage /></LockedPageGate></PageTransition>} />
+        <Route path="media" element={<PageTransition><MediaPage /></PageTransition>} />
         <Route path="subscription" element={<PageTransition><SubscriptionPage /></PageTransition>} />
         <Route path="credits" element={<PageTransition><CreditsPage /></PageTransition>} />
         <Route path="settings" element={<PageTransition><SettingsPage /></PageTransition>} />

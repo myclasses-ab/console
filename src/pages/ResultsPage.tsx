@@ -30,6 +30,11 @@ function getAvatarColor(name: string) {
   return colors[Math.abs(hash) % colors.length];
 }
 
+function toTitleCase(str: string): string {
+  if (!str) return str;
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase());
+}
+
 function StudentPhoto({ name, photoUrl }: { name: string; photoUrl?: string | null }) {
   const [error, setError] = useState(false);
   const imageUrl = studentImageUrl(photoUrl);
@@ -192,10 +197,10 @@ export default function ResultsPage() {
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         <StudentPhoto name={r.studentName} photoUrl={r.studentPhotoUrl} />
-                        <span className="font-medium text-slate-900">{r.studentName}</span>
+                        <span className="font-medium text-slate-900">{toTitleCase(r.studentName)}</span>
                       </div>
                     </td>
-                    <td className="px-5 py-3 text-slate-600">{r.exam || '-'}</td>
+                    <td className="px-5 py-3 text-slate-600">{toTitleCase(r.exam) || '-'}</td>
                     <td className="px-5 py-3 text-slate-600">{r.value || '-'}</td>
                     <td className="px-5 py-3">
                       {r.isFeatured ? (
@@ -220,10 +225,10 @@ export default function ResultsPage() {
             {results.map((r) => (
               <MobileListCard
                 key={r.identifier}
-                title={r.studentName}
+                title={toTitleCase(r.studentName)}
                 subtitle={
                   <div className="space-y-0.5">
-                    <div>{r.exam || 'No exam'}</div>
+                    <div>{toTitleCase(r.exam) || 'No exam'}</div>
                     <div className="text-xs text-slate-500">Score: {r.value || '-'}</div>
                   </div>
                 }

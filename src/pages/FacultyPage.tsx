@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useInstitute } from '@/context/InstituteContext';
 import { facultyApi, uploadApi } from '@/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import MobileListCard from '@/components/shared/MobileListCard';
-import { Plus, Pencil, Trash2, Users, Upload } from 'lucide-react';
+import { Plus, Pencil, Trash2, Users, Upload, ArrowRight } from 'lucide-react';
 import type { Faculty } from '@/types';
 import { toast } from 'sonner';
 import { facultyImageUrl } from '@/lib/image-url';
@@ -72,6 +73,7 @@ const emptyFaculty: Partial<Faculty> = {
 };
 
 export default function FacultyPage() {
+  const navigate = useNavigate();
   const { institute } = useInstitute();
   const [faculty, setFaculty] = useState<Faculty[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -267,6 +269,18 @@ export default function FacultyPage() {
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {faculty.length > 0 && (
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={() => navigate('/facilities')}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm"
+          >
+            Next: Facilities
+            <ArrowRight size={16} />
+          </button>
         </div>
       )}
 

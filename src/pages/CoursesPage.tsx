@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useInstitute } from '@/context/InstituteContext';
 import { instituteCourseApi, branchApi } from '@/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import MobileListCard from '@/components/shared/MobileListCard';
-import { Plus, Pencil, Trash2, BookOpen } from 'lucide-react';
+import { Plus, Pencil, Trash2, BookOpen, ArrowRight } from 'lucide-react';
 import type { InstituteCourse, Branch } from '@/types';
 import { toast } from 'sonner';
+
+function toTitleCase(str: string): string {
+  if (!str) return str;
+  return str.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.slice(1).toLowerCase());
+}
 
 const emptyCourse: Partial<InstituteCourse> = {
   branchIdentifier: '',
@@ -23,6 +29,7 @@ const emptyCourse: Partial<InstituteCourse> = {
 };
 
 export default function CoursesPage() {
+  const navigate = useNavigate();
   const { institute } = useInstitute();
   const [courses, setCourses] = useState<InstituteCourse[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -102,7 +109,7 @@ export default function CoursesPage() {
 
   const getBranchName = (id: string | null) => {
     if (!id) return 'N/A';
-    return branches.find((b) => b.identifier === id)?.name || id.slice(0, 8);
+    return toTitleCase(branches.find((b) => b.identifier === id)?.name || id.slice(0, 8));
   };
 
   if (isLoading) {
@@ -162,7 +169,7 @@ export default function CoursesPage() {
               <tbody className="divide-y divide-slate-100">
                 {courses.map((course) => (
                   <tr key={course.identifier} className="hover:bg-slate-50">
-                    <td className="px-5 py-3 font-medium text-slate-900">{course.courseName || 'Untitled Course'}</td>
+                    <td className="px-5 py-3 font-medium text-slate-900">{toTitleCase(course.courseName) || 'Untitled Course'}</td>
                     <td className="px-5 py-3 text-slate-600">{getBranchName(course.branchIdentifier)}</td>
                     <td className="px-5 py-3 text-slate-600">
                       ₹{Number(course.fee).toLocaleString() || 0}
@@ -193,7 +200,7 @@ export default function CoursesPage() {
             {courses.map((course) => (
               <MobileListCard
                 key={course.identifier}
-                title={course.courseName || 'Untitled Course'}
+                title={toTitleCase(course.courseName) || 'Untitled Course'}
                 subtitle={
                   <div className="space-y-0.5">
                     <div>{getBranchName(course.branchIdentifier)}</div>
@@ -228,6 +235,18 @@ export default function CoursesPage() {
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {courses.length > 0 && (
+        <div className="mt-6 flex justify-end">
+          <button
+            onClick={() => navigate('/faculty')}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors shadow-sm"
+          >
+            Next: Faculty
+            <ArrowRight size={16} />
+          </button>
         </div>
       )}
 

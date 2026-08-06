@@ -1,5 +1,6 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/store/uiStore';
+import { useSetupStatus, type SetupStep } from '@/hooks/useSetupStatus';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
@@ -11,13 +12,14 @@ import {
   MessageSquare,
   HelpCircle,
   Shield,
-  CreditCard,
   Settings,
   ChevronLeft,
   ChevronRight,
   UserCheck,
   GraduationCap,
   Coins,
+  Lock,
+  Image,
 } from 'lucide-react';
 
 interface NavItem {
@@ -44,6 +46,7 @@ const navSections: NavSection[] = [
       { label: 'Courses', icon: BookOpen, path: '/courses' },
       { label: 'Faculty', icon: Users, path: '/faculty' },
       { label: 'Facilities', icon: Shield, path: '/facilities' },
+      { label: 'Media Gallery', icon: Image, path: '/media' },
     ],
   },
   {
@@ -65,8 +68,24 @@ const navSections: NavSection[] = [
   },
 ];
 
+function getSetupStepForPath(path: string): SetupStep | null {
+  switch (path) {
+    case '/branches':
+      return 'branches';
+    case '/courses':
+      return 'courses';
+    case '/faculty':
+      return 'faculty';
+    case '/facilities':
+      return 'faculty';
+    default:
+      return null;
+  }
+}
+
 export default function Sidebar() {
   const { sidebarCollapsed, toggleSidebar } = useUIStore();
+  const { isStepUnlocked } = useSetupStatus();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -126,15 +145,22 @@ export default function Sidebar() {
             <div className="space-y-0.5">
               {section.items.map((item) => {
                 const isActive = location.pathname === item.path;
+                const step = getSetupStepForPath(item.path);
+                const isLocked = step !== null && !isStepUnlocked(step);
                 return (
                   <button
                     key={item.path}
-                    onClick={() => navigate(item.path)}
+                    onClick={() => {
+                      if (!isLocked) navigate(item.path);
+                    }}
+                    disabled={isLocked}
                     className={cn(
                       'group relative flex items-center w-full rounded-lg text-sm font-medium transition-all duration-200',
                       sidebarCollapsed ? 'justify-center px-2 py-2.5' : 'gap-3 px-3 py-2',
                       isActive
                         ? 'bg-primary-500/10 text-primary-400'
+                        : isLocked
+                        ? 'text-slate-600 cursor-not-allowed'
                         : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
                     )}
                     title={sidebarCollapsed ? item.label : undefined}
@@ -151,16 +177,24 @@ export default function Sidebar() {
                         sidebarCollapsed ? 'w-8 h-8 rounded-lg' : 'w-5 h-5',
                         isActive
                           ? 'text-primary-400'
+                          : isLocked
+                          ? 'text-slate-600'
                           : 'text-slate-500 group-hover:text-slate-300',
                         sidebarCollapsed && isActive && 'bg-primary-500/15'
                       )}
                     >
-                      <item.icon size={sidebarCollapsed ? 20 : 18} strokeWidth={isActive ? 2.2 : 2} />
+                      {isLocked ? (
+                        <Lock size={sidebarCollapsed ? 18 : 16} />
+                      ) : (
+                        <item.icon size={sidebarCollapsed ? 20 : 18} strokeWidth={isActive ? 2.2 : 2} />
+                      )}
                     </span>
 
                     {/* Label */}
                     {!sidebarCollapsed && (
-                      <span className="truncate">{item.label}</span>
+                      <span className={cn('truncate', isLocked && 'text-slate-600')}>
+                        {item.label}
+                      </span>
                     )}
                   </button>
                 );

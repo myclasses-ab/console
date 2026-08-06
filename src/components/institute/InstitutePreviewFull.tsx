@@ -49,7 +49,7 @@ import {
   Bookmark,
   AlertCircle,
 } from 'lucide-react';
-import { instituteLogoUrl, instituteBannerUrl, facultyImageUrl, studentImageUrl } from '@/lib/image-url';
+import { instituteLogoUrl, facultyImageUrl, studentImageUrl } from '@/lib/image-url';
 import {
   branchApi,
   instituteFacilityApi,
@@ -174,7 +174,6 @@ function InstituteHero({ institute }: { institute: Institute }) {
     name,
     tagline,
     logoUrl,
-    bannerUrl,
     averageRating,
     totalReviews,
     totalStudentsEnrolled,
@@ -185,7 +184,6 @@ function InstituteHero({ institute }: { institute: Institute }) {
     subscriptionTier,
   } = institute;
 
-  const banner = instituteBannerUrl(bannerUrl) || getPlaceholderImage();
   const logo = instituteLogoUrl(logoUrl) || getPlaceholderImage();
 
   const handleShare = async () => {
@@ -215,7 +213,7 @@ function InstituteHero({ institute }: { institute: Institute }) {
       <div className="relative h-48 sm:h-64 lg:h-80">
         <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/80 z-10" />
         <img
-          src={banner}
+          src="/assets/institute-banner.svg"
           alt={name}
           className="w-full h-full object-cover"
           onError={(e) => {

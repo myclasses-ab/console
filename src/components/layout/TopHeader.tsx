@@ -125,7 +125,13 @@ export default function TopHeader() {
                 className="fixed inset-0 z-10"
                 onClick={closeAllDropdowns}
               />
-              <div className="absolute right-0 top-full mt-1 w-[calc(100vw-2rem)] max-w-sm sm:w-96 bg-white rounded-xl border border-slate-200 shadow-lg z-20 py-2 max-h-[28rem] flex flex-col">
+              <div
+                className={cn(
+                  'bg-white rounded-xl border border-slate-200 shadow-lg z-20 py-2 flex flex-col',
+                  'fixed left-4 right-4 top-16 max-h-[calc(100vh-5rem)]',
+                  'sm:absolute sm:right-0 sm:left-auto sm:top-full sm:mt-1 sm:w-96'
+                )}
+              >
                 <div className="px-4 py-2 border-b border-slate-100">
                   <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
                 </div>

@@ -1,15 +1,15 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/store/uiStore';
+import { useSetupStatus, type SetupStep } from '@/hooks/useSetupStatus';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard,
   Building2,
   BookOpen,
-  Calendar,
-  Users,
   Menu,
   X,
+  Lock,
 } from 'lucide-react';
 
 const mobileItems = [
@@ -27,13 +27,30 @@ const moreItems = [
   { label: 'My Leads', path: '/leads' },
   { label: 'FAQs', path: '/faqs' },
   { label: 'Facilities', path: '/facilities' },
+  { label: 'Media Gallery', path: '/media' },
   // { label: 'Subscription', path: '/subscription' },
   { label: 'Settings', path: '/settings' },
 ];
 
+function getSetupStepForPath(path: string): SetupStep | null {
+  switch (path) {
+    case '/branches':
+      return 'branches';
+    case '/courses':
+      return 'courses';
+    case '/faculty':
+      return 'faculty';
+    case '/facilities':
+      return 'faculty';
+    default:
+      return null;
+  }
+}
+
 export default function MobileNav() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { isStepUnlocked } = useSetupStatus();
   const { mobileNavOpen, setMobileNavOpen } = useUIStore();
   const [showMore, setShowMore] = useState(false);
 
@@ -44,10 +61,13 @@ export default function MobileNav() {
         <div className="flex justify-around items-center h-14">
           {mobileItems.map((item) => {
             const isActive = item.path ? location.pathname === item.path : false;
+            const step = item.path ? getSetupStepForPath(item.path) : null;
+            const isLocked = step !== null && !isStepUnlocked(step);
             return (
               <button
                 key={item.label}
                 onClick={() => {
+                  if (isLocked) return;
                   if (item.path) {
                     navigate(item.path);
                   } else {
@@ -56,10 +76,10 @@ export default function MobileNav() {
                 }}
                 className={cn(
                   'flex flex-col items-center gap-0.5 py-1 px-3 text-xs',
-                  isActive ? 'text-primary-600' : 'text-slate-500'
+                  isActive ? 'text-primary-600' : isLocked ? 'text-slate-400' : 'text-slate-500'
                 )}
               >
-                <item.icon size={20} />
+                {isLocked ? <Lock size={18} /> : <item.icon size={20} />}
                 <span>{item.label}</span>
               </button>
             );
@@ -79,23 +99,31 @@ export default function MobileNav() {
               </button>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {moreItems.map((item) => (
-                <button
-                  key={item.path}
-                  onClick={() => {
-                    setShowMore(false);
-                    navigate(item.path);
-                  }}
-                  className={cn(
-                    'text-left px-4 py-3 rounded-lg text-sm font-medium',
-                    location.pathname === item.path
-                      ? 'bg-primary-50 text-primary-700'
-                      : 'text-slate-600 hover:bg-slate-50'
-                  )}
-                >
-                  {item.label}
-                </button>
-              ))}
+              {moreItems.map((item) => {
+                const step = getSetupStepForPath(item.path);
+                const isLocked = step !== null && !isStepUnlocked(step);
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => {
+                      if (isLocked) return;
+                      setShowMore(false);
+                      navigate(item.path);
+                    }}
+                    className={cn(
+                      'text-left px-4 py-3 rounded-lg text-sm font-medium flex items-center gap-2',
+                      location.pathname === item.path
+                        ? 'bg-primary-50 text-primary-700'
+                        : isLocked
+                        ? 'text-slate-400 cursor-not-allowed'
+                        : 'text-slate-600 hover:bg-slate-50'
+                    )}
+                  >
+                    {isLocked && <Lock size={14} />}
+                    {item.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </>
@@ -124,25 +152,34 @@ export default function MobileNav() {
                 { label: 'My Leads', path: '/leads' },
                               { label: 'FAQs', path: '/faqs' },
                 { label: 'Facilities', path: '/facilities' },
+                { label: 'Media Gallery', path: '/media' },
                 { label: 'Subscription', path: '/subscription' },
                 { label: 'Settings', path: '/settings' },
-              ].map((item) => (
-                <button
-                  key={item.path}
-                  onClick={() => {
-                    setMobileNavOpen(false);
-                    navigate(item.path);
-                  }}
-                  className={cn(
-                    'block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium',
-                    location.pathname === item.path
-                      ? 'bg-primary-50 text-primary-700'
-                      : 'text-slate-600 hover:bg-slate-50'
-                  )}
-                >
-                  {item.label}
-                </button>
-              ))}
+              ].map((item) => {
+                const step = getSetupStepForPath(item.path);
+                const isLocked = step !== null && !isStepUnlocked(step);
+                return (
+                  <button
+                    key={item.path}
+                    onClick={() => {
+                      if (isLocked) return;
+                      setMobileNavOpen(false);
+                      navigate(item.path);
+                    }}
+                    className={cn(
+                      'block w-full text-left px-4 py-2.5 rounded-lg text-sm font-medium flex items-center gap-2',
+                      location.pathname === item.path
+                        ? 'bg-primary-50 text-primary-700'
+                        : isLocked
+                        ? 'text-slate-400 cursor-not-allowed'
+                        : 'text-slate-600 hover:bg-slate-50'
+                    )}
+                  >
+                    {isLocked && <Lock size={14} />}
+                    {item.label}
+                  </button>
+                );
+              })}
             </nav>
           </div>
         </>

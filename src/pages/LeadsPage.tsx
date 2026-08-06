@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useInstitute } from '@/context/InstituteContext';
 import { inquiryApi, creditsApi } from '@/api';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import MobileListCard from '@/components/shared/MobileListCard';
-import { Mail, X, Save, Phone, Calendar, User, BookOpen, Lock } from 'lucide-react';
+import { Mail, X, Save, Phone, Calendar, User, BookOpen, Lock, Coins } from 'lucide-react';
 import type { Inquiry } from '@/types';
 import { InquiryStatus } from '@/types';
 import { toast } from 'sonner';
@@ -39,6 +40,7 @@ const statusColors: Record<InquiryStatus, string> = {
 
 export default function LeadsPage() {
   const { institute } = useInstitute();
+  const navigate = useNavigate();
   const [inquiries, setInquiries] = useState<Inquiry[]>([]);
   const [filteredInquiries, setFilteredInquiries] = useState<Inquiry[]>([]);
   const [statusFilter, setStatusFilter] = useState<InquiryStatus | 'ALL'>('ALL');
@@ -48,6 +50,7 @@ export default function LeadsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [unlockingId, setUnlockingId] = useState<string | null>(null);
   const [creditBalance, setCreditBalance] = useState<number>(0);
+  const [showNoCreditsModal, setShowNoCreditsModal] = useState(false);
 
   const loadData = async (): Promise<Inquiry[]> => {
     if (!institute?.identifier) {
@@ -131,7 +134,7 @@ export default function LeadsPage() {
   const handleUnlock = async (inquiry: Inquiry) => {
     if (!institute?.identifier) return;
     if (creditBalance < 1) {
-      toast.error('Insufficient credits. You need at least 1 credit to unlock contact details.');
+      setShowNoCreditsModal(true);
       return;
     }
     setUnlockingId(inquiry.identifier);
@@ -153,6 +156,23 @@ export default function LeadsPage() {
   const displayName = (inquiry: Inquiry) => inquiry.studentName || inquiry.name || 'Student';
   const displayPhone = (inquiry: Inquiry) => inquiry.studentPhone || inquiry.phone || 'N/A';
   const displayCourse = (inquiry: Inquiry) => inquiry.courseName || inquiry.courseIdentifier || 'N/A';
+  const displayCourseFee = (inquiry: Inquiry) => {
+    const fee = inquiry.courseFee;
+    if (fee == null || fee === '') return 'N/A';
+    const numFee = Number(fee);
+    if (Number.isNaN(numFee) || numFee <= 0) return 'N/A';
+    return `₹${numFee.toLocaleString('en-IN')}`;
+  };
+  const displayDate = (inquiry: Inquiry) => {
+    if (!inquiry.createdAt) return 'N/A';
+    return new Date(inquiry.createdAt).toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
 
   if (isLoading) {
     return (
@@ -202,6 +222,7 @@ export default function LeadsPage() {
                   <th className="text-left px-5 py-3 font-medium">Student</th>
                   <th className="text-left px-5 py-3 font-medium">Phone</th>
                   <th className="text-left px-5 py-3 font-medium">Course</th>
+                  <th className="text-left px-5 py-3 font-medium">Course Fee</th>
                   <th className="text-left px-5 py-3 font-medium">Date</th>
                   <th className="text-left px-5 py-3 font-medium">Status</th>
                   <th className="text-left px-5 py-3 font-medium text-right">Actions</th>
@@ -234,10 +255,13 @@ export default function LeadsPage() {
                         {displayCourse(inquiry)}
                       </div>
                     </td>
+                    <td className="px-5 py-3 text-slate-600">
+                      <span className="font-medium">{displayCourseFee(inquiry)}</span>
+                    </td>
                     <td className="px-5 py-3 text-slate-500">
                       <div className="flex items-center gap-1.5">
                         <Calendar className="w-3.5 h-3.5" />
-                        {new Date(inquiry.createdAt).toLocaleDateString()}
+                        {displayDate(inquiry)}
                       </div>
                     </td>
                     <td className="px-5 py-3">
@@ -284,6 +308,10 @@ export default function LeadsPage() {
                       <BookOpen className="w-3.5 h-3.5 text-slate-400" />
                       {displayCourse(inquiry)}
                     </div>
+                    <div className="flex items-center gap-1.5 text-slate-600">
+                      <span className="text-xs text-slate-400">Fee:</span>
+                      {displayCourseFee(inquiry)}
+                    </div>
                   </div>
                 }
                 badge={
@@ -291,7 +319,7 @@ export default function LeadsPage() {
                     {inquiry.status}
                   </span>
                 }
-                meta={new Date(inquiry.createdAt).toLocaleDateString()}
+                meta={displayDate(inquiry)}
                 actions={
                   !inquiry.contactUnlocked ? (
                     <button
@@ -308,6 +336,38 @@ export default function LeadsPage() {
                 }
               />
             ))}
+          </div>
+        </div>
+      )}
+
+      {showNoCreditsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setShowNoCreditsModal(false)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-sm p-6 text-center">
+            <div className="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Coins className="w-6 h-6 text-amber-600" />
+            </div>
+            <h2 className="text-lg font-bold text-slate-900 mb-2">Not enough credits</h2>
+            <p className="text-sm text-slate-600 mb-6">
+              You don't have credit to unblock this lead. Buy credit from the credit page.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setShowNoCreditsModal(false)}
+                className="flex-1 px-4 py-2 rounded-xl bg-white text-slate-700 text-sm font-medium border border-slate-200 hover:bg-slate-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowNoCreditsModal(false);
+                  navigate('/credits');
+                }}
+                className="flex-1 px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
+              >
+                Buy Credits
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -343,6 +403,10 @@ export default function LeadsPage() {
                   <p className="text-sm font-medium text-slate-900">{displayCourse(selectedInquiry)}</p>
                 </div>
                 <div>
+                  <p className="text-xs text-slate-500 mb-1">Course Fee</p>
+                  <p className="text-sm font-medium text-slate-900">{displayCourseFee(selectedInquiry)}</p>
+                </div>
+                <div>
                   <p className="text-xs text-slate-500 mb-1">Standard</p>
                   <p className="text-sm font-medium text-slate-900">{selectedInquiry.standard || 'N/A'}</p>
                 </div>
@@ -367,7 +431,7 @@ export default function LeadsPage() {
                   </div>
                   <button
                     onClick={() => handleUnlock(selectedInquiry)}
-                    disabled={unlockingId === selectedInquiry.identifier || creditBalance < 1}
+                    disabled={unlockingId === selectedInquiry.identifier}
                     className="px-4 py-2 rounded-xl bg-amber-500 text-white text-sm font-semibold hover:bg-amber-600 disabled:opacity-50 transition-colors"
                   >
                     {unlockingId === selectedInquiry.identifier ? 'Unlocking...' : 'Unlock 1 credit'}

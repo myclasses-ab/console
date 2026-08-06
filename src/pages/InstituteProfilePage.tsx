@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { useInstitute } from "@/context/InstituteContext";
 import { instituteApi, uploadApi } from "@/api";
 import type { Institute } from "@/types";
@@ -18,7 +19,6 @@ import {
   Eye,
   Star,
   CheckCircle,
-  Users,
   Calendar,
   ArrowRight,
   Info,
@@ -26,7 +26,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
-import { instituteLogoUrl, instituteBannerUrl } from "@/lib/image-url";
+import { instituteLogoUrl } from "@/lib/image-url";
 import { motion, AnimatePresence } from "framer-motion";
 import InstitutePreviewFull from "@/components/institute/InstitutePreviewFull";
 
@@ -170,6 +170,7 @@ function ImageUploader({
   sublabel,
   previewUrl,
   aspect = "square",
+  objectFit = "cover",
   onFileSelect,
   onClear,
   isUploading,
@@ -178,6 +179,7 @@ function ImageUploader({
   sublabel?: string;
   previewUrl: string;
   aspect?: "square" | "wide";
+  objectFit?: "cover" | "contain";
   onFileSelect: (file: File) => void;
   onClear: () => void;
   isUploading: boolean;
@@ -196,7 +198,7 @@ function ImageUploader({
     [onFileSelect]
   );
 
-  const sizeClasses = aspect === "wide" ? "h-48" : "h-40 w-full";
+  const sizeClasses = aspect === "wide" ? "h-48" : "h-48 w-full";
 
   return (
     <div>
@@ -214,7 +216,7 @@ function ImageUploader({
             : previewUrl
             ? "border-slate-200 hover:border-primary-400"
             : "border-slate-300 hover:border-primary-400 bg-slate-50/50"
-        } ${aspect === "wide" ? "w-full" : "w-full sm:w-40"}`}
+        } ${aspect === "wide" ? "w-full" : "w-full sm:w-56"}`}
       >
         <div className={`${sizeClasses} relative`}>
           {previewUrl ? (
@@ -222,7 +224,9 @@ function ImageUploader({
               <img
                 src={previewUrl}
                 alt={label}
-                className="w-full h-full object-cover"
+                className={`w-full h-full ${
+                  objectFit === "contain" ? "object-contain p-3" : "object-cover"
+                }`}
               />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
                 <div className="flex items-center gap-2 text-white text-sm font-medium">
@@ -276,45 +280,32 @@ function ImageUploader({
 
 function InstitutePreview({ institute }: { institute: any }) {
   const logo = instituteLogoUrl(institute.logoUrl);
-  const banner = instituteBannerUrl(institute.bannerUrl);
   const rating = Number(institute.averageRating || 0).toFixed(1);
 
   return (
     <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
-      {/* Mini Banner */}
-      <div className="relative h-32">
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-black/70 z-10" />
-        <img
-          src={banner || "/assets/sample_image_for_anything.png"}
-          alt="banner"
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 z-20 flex items-end p-4">
-          <div className="flex items-end gap-3">
-            <div className="w-14 h-14 rounded-xl bg-white shadow-lg p-1 flex items-center justify-center -mb-4">
-              <img
-                src={logo || "/assets/sample_image_for_anything.png"}
-                alt="logo"
-                className="w-full h-full object-contain rounded-lg"
-              />
-            </div>
-            <div className="pb-1">
-              <h3 className="text-white font-bold text-sm leading-tight drop-shadow">
-                {institute.name || "Institute Name"}
-              </h3>
-              {institute.tagline && (
-                <p className="text-white/90 text-xs truncate max-w-[120px] sm:max-w-[180px] drop-shadow">
-                  {institute.tagline}
-                </p>
-              )}
-            </div>
-          </div>
+      <div className="p-5 flex flex-col items-center text-center">
+        {/* Logo */}
+        <div className="w-24 h-24 rounded-2xl bg-white border border-slate-200 shadow-md p-2.5 flex items-center justify-center mb-4">
+          <img
+            src={logo || "/assets/sample_image_for_anything.png"}
+            alt={institute.name || "Institute logo"}
+            className="w-full h-full object-contain rounded-xl"
+          />
         </div>
-      </div>
 
-      {/* Info */}
-      <div className="pt-6 px-4 pb-4">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
+        {/* Name & Tagline */}
+        <h3 className="text-base font-bold text-slate-900 leading-tight">
+          {institute.name || "Institute Name"}
+        </h3>
+        {institute.tagline && (
+          <p className="text-xs text-slate-500 mt-1 line-clamp-2 max-w-[220px]">
+            {institute.tagline}
+          </p>
+        )}
+
+        {/* Badges */}
+        <div className="flex flex-wrap items-center justify-center gap-2 mt-3">
           <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-full">
             <Star size={12} className="text-amber-500 fill-amber-500" />
             <span className="text-xs font-bold text-amber-700">{rating}</span>
@@ -332,40 +323,19 @@ function InstitutePreview({ institute }: { institute: any }) {
             </span>
           )}
         </div>
-
-        {institute.description && (
-          <div className="mb-3">
-            <h4 className="text-xs font-semibold text-slate-900 mb-1 flex items-center gap-1">
-              <Building2 size={12} className="text-primary-500" />
-              About Us
-            </h4>
-            <p className="text-xs text-slate-600 leading-relaxed line-clamp-4">
-              {institute.description}
-            </p>
-          </div>
-        )}
-
-        {/* <div className="space-y-1.5">
-          {institute.phonePrimary && (
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <Phone size={12} className="text-slate-400" />
-              {institute.phonePrimary}
-            </div>
-          )}
-          {institute.email && (
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <Mail size={12} className="text-slate-400" />
-              <span className="truncate">{institute.email}</span>
-            </div>
-          )}
-          {institute.websiteUrl && (
-            <div className="flex items-center gap-2 text-xs text-slate-600">
-              <Globe size={12} className="text-slate-400" />
-              <span className="truncate">{institute.websiteUrl}</span>
-            </div>
-          )}
-        </div> */}
       </div>
+
+      {institute.description && (
+        <div className="px-5 pb-5">
+          <h4 className="text-xs font-semibold text-slate-900 mb-1 flex items-center gap-1">
+            <Building2 size={12} className="text-primary-500" />
+            About Us
+          </h4>
+          <p className="text-xs text-slate-600 leading-relaxed line-clamp-4">
+            {institute.description}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -376,8 +346,8 @@ function InstitutePreview({ institute }: { institute: any }) {
 
 function ProfileTips({ institute }: { institute: any }) {
   const tips = [
-    { label: "Complete your profile 100%", desc: "Complete all sections to rank higher in search results", check: (i: any) => i.name && i.tagline && i.description && i.logoUrl && i.bannerUrl },
-    { label: "Upload high quality photos", desc: "Good photos build trust and credibility", check: (i: any) => i.logoUrl && i.bannerUrl },
+    { label: "Complete your profile 100%", desc: "Complete all sections to rank higher in search results", check: (i: any) => i.name && i.tagline && i.description && i.logoUrl },
+    { label: "Upload a high quality logo", desc: "A clear logo helps students recognize your institute", check: (i: any) => !!i.logoUrl },
     { label: "Keep your profile updated", desc: "Regular updates improve visibility", check: () => true },
   ];
 
@@ -411,11 +381,36 @@ function ProfileTips({ institute }: { institute: any }) {
    Main Page
    ─────────────────────────────── */
 
+const REQUIRED_PROFILE_FIELDS: { key: keyof Institute; label: string }[] = [
+  { key: "name", label: "Institute Name" },
+  { key: "tagline", label: "Tagline" },
+  { key: "description", label: "About Us" },
+  { key: "email", label: "Email Address" },
+  { key: "logoUrl", label: "Institute Logo" },
+];
+
+function getMissingProfileFields(data: Record<string, any>): string[] {
+  const missing: string[] = [];
+  for (const field of REQUIRED_PROFILE_FIELDS) {
+    const value = data[field.key];
+    if (value === undefined || value === null || String(value).trim() === "") {
+      missing.push(field.label);
+    }
+  }
+  const hasPhoneOrWhatsApp =
+    String(data.phonePrimary || "").trim() !== "" || String(data.whatsappNumber || "").trim() !== "";
+  if (!hasPhoneOrWhatsApp) {
+    missing.push("Phone Number or WhatsApp Number");
+  }
+  return missing;
+}
+
 export default function InstituteProfilePage() {
   const { institute, refreshInstitute } = useInstitute();
+  const navigate = useNavigate();
   const [isSaving, setIsSaving] = useState(false);
   const [formData, setFormData] = useState<Record<string, any>>({});
-  const [isUploading, setIsUploading] = useState({ logo: false, banner: false });
+  const [isUploading, setIsUploading] = useState({ logo: false });
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   useEffect(() => {
@@ -442,6 +437,26 @@ export default function InstituteProfilePage() {
     }
   };
 
+  const handleSaveAndNext = async () => {
+    if (!institute?.identifier) return;
+    const missing = getMissingProfileFields(formData);
+    if (missing.length > 0) {
+      toast.error(`Please fill in: ${missing.join(", ")}`);
+      return;
+    }
+    setIsSaving(true);
+    try {
+      await instituteApi.update(institute.identifier, formData);
+      await refreshInstitute();
+      toast.success("Profile saved successfully!");
+      navigate("/branches");
+    } catch (err) {
+      toast.error("Failed to save profile");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const handleLogoUpload = async (file: File) => {
     if (!institute?.identifier) return;
     setIsUploading((p) => ({ ...p, logo: true }));
@@ -457,23 +472,7 @@ export default function InstituteProfilePage() {
     }
   };
 
-  const handleBannerUpload = async (file: File) => {
-    if (!institute?.identifier) return;
-    setIsUploading((p) => ({ ...p, banner: true }));
-    try {
-      const oldBannerKey = formData["bannerUrl"] || institute.bannerUrl;
-      const result = await uploadApi.uploadBanner(file, institute.identifier, oldBannerKey);
-      handleChange("bannerUrl", result.key);
-      toast.success("Banner uploaded successfully");
-    } catch (err) {
-      toast.error("Failed to upload banner");
-    } finally {
-      setIsUploading((p) => ({ ...p, banner: false }));
-    }
-  };
-
   const handleClearLogo = () => handleChange("logoUrl", "");
-  const handleClearBanner = () => handleChange("bannerUrl", "");
 
   if (!institute) {
     return (
@@ -484,7 +483,7 @@ export default function InstituteProfilePage() {
   }
 
   const completionPercent = (() => {
-    const fields = ["name", "tagline", "description", "email", "phonePrimary", "logoUrl", "bannerUrl", "websiteUrl"];
+    const fields = ["name", "tagline", "description", "email", "phonePrimary", "logoUrl", "websiteUrl"];
     const filled = fields.filter((f) => {
       const v = formData[f];
       return v !== undefined && v !== null && v !== "";
@@ -672,27 +671,17 @@ export default function InstituteProfilePage() {
 
           {/* Branding */}
           <SectionCard title="Branding & Media" icon={ImageIcon}>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="max-w-md">
               <ImageUploader
                 label="Institute Logo"
-                sublabel="Recommended: 512×512px, JPG or PNG (max 2MB)"
+                sublabel="Recommended: 512×512px, JPG or PNG (max 2MB). A transparent background works best."
                 previewUrl={instituteLogoUrl(formData["logoUrl"])}
                 aspect="square"
+                objectFit="contain"
                 onFileSelect={handleLogoUpload}
                 onClear={handleClearLogo}
                 isUploading={isUploading.logo}
               />
-              <div className="md:col-span-1">
-                <ImageUploader
-                  label="Cover Banner"
-                  sublabel="Recommended: 1200×400px, JPG or PNG (max 5MB)"
-                  previewUrl={instituteBannerUrl(formData["bannerUrl"])}
-                  aspect="wide"
-                  onFileSelect={handleBannerUpload}
-                  onClear={handleClearBanner}
-                  isUploading={isUploading.banner}
-                />
-              </div>
             </div>
           </SectionCard>
 
@@ -797,12 +786,12 @@ export default function InstituteProfilePage() {
               Preview
             </button>
             <button
-              onClick={handleSave}
+              onClick={handleSaveAndNext}
               disabled={isSaving}
               className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 transition-colors disabled:opacity-50 shadow-sm"
             >
-              <Save size={16} />
-              {isSaving ? "Saving..." : "Save Changes"}
+              {isSaving ? "Saving..." : "Save & Next"}
+              <ArrowRight size={16} />
             </button>
           </div>
         </div>

@@ -107,6 +107,32 @@ export const uploadApi = {
   },
 
   /**
+   * Upload institute media/gallery image
+   * @param file - The image file
+   * @param mediaIdentifier - Unique media identifier for deterministic naming
+   * @param oldImageUrl - Optional previous image URL/key to delete before upload (for replacement)
+   * @returns Object with key (S3 object key) and fileName
+   */
+  uploadInstituteMediaImage: async (
+    file: File,
+    mediaIdentifier: string,
+    oldImageUrl?: string | null
+  ): Promise<{ key: string; url: string; fileName: string; folder: string; resourceId?: string }> => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'instituteMedia');
+    formData.append('resourceId', mediaIdentifier);
+    if (oldImageUrl) {
+      formData.append('oldFileUrl', oldImageUrl);
+    }
+
+    const response = await axios.post('/upload', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return response.data;
+  },
+
+  /**
    * Generic upload (fallback for other media types)
    * @param file - The file to upload
    * @param folder - S3 folder name

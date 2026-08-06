@@ -90,6 +90,17 @@ export function mediaImageUrl(key: string | null | undefined): string {
 }
 
 /**
+ * Get the full public URL for an institute media/gallery image
+ * Expected S3 key format: instituteMedia/{mediaIdentifier}.{ext}
+ *
+ * @param key - The S3 object key, filename, or full URL
+ * @returns Full HTTPS URL or empty string
+ */
+export function instituteMediaUrl(key: string | null | undefined): string {
+  return s3ImageUrl(key, "instituteMedia");
+}
+
+/**
  * Extract just the object key from a full S3 URL
  * Useful for storing in database (store just the key, not full URL)
  * 

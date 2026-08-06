@@ -36,12 +36,12 @@ import {
   Star,
   MessageSquare,
   CreditCard,
-  TrendingUp,
   UserCheck,
   Coins,
   MapPin,
   Sparkles,
   Calendar,
+  HelpCircle,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -170,11 +170,6 @@ export default function DashboardPage() {
     [user?.fullName]
   );
 
-  const avgRating = useMemo(() => {
-    const raw = institute?.averageRating;
-    return typeof raw === 'string' ? parseFloat(raw) : raw || 0;
-  }, [institute?.averageRating]);
-
   const pendingInquiries = useMemo(
     () => inquiries.filter((i) => i.status === InquiryStatus.NEW).length,
     [inquiries]
@@ -295,22 +290,49 @@ export default function DashboardPage() {
         />
         <StatCard title="Total Courses" value={courses.length} icon={BookOpen} />
         <StatCard title="Total Faculty" value={faculty.length} icon={Users} />
-        <StatCard
-          title="New Leads"
-          value={pendingInquiries}
-          icon={UserCheck}
-          trend="Pending"
-          trendUp={pendingInquiries > 0}
+
+        {/* Leads Box */}
+        <div
           onClick={() => navigate('/leads')}
-        />
-        <StatCard title="Avg Rating" value={avgRating.toFixed(1)} icon={Star} />
-        <StatCard title="Total Reviews" value={reviews.length} icon={MessageSquare} />
+          className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm cursor-pointer hover:border-primary-300 hover:shadow-md transition-all"
+        >
+          <div className="flex items-start justify-between mb-2">
+            <p className="text-sm font-medium text-slate-500">Leads</p>
+            <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center">
+              <UserCheck size={20} className="text-primary-600" />
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div>
+              <p className="text-xl font-bold text-slate-900">{inquiries.length}</p>
+              <p className="text-xs text-slate-500">Total</p>
+            </div>
+            <div className="w-px h-8 bg-slate-200" />
+            <div>
+              <p className="text-xl font-bold text-slate-900">{pendingInquiries}</p>
+              <p className="text-xs text-slate-500">New</p>
+            </div>
+          </div>
+        </div>
+
         <StatCard title="Branches" value={branches.length} icon={MapPin} />
-        <StatCard
-          title="Total Students"
-          value={institute?.totalStudentsEnrolled || 0}
-          icon={TrendingUp}
-        />
+
+        {/* Help & Support */}
+        <div
+          onClick={() => navigate('/faqs')}
+          className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm cursor-pointer hover:border-primary-300 hover:shadow-md transition-all"
+        >
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-500 mb-1">Help & Support</p>
+              <p className="text-xl font-bold text-slate-900">FAQs</p>
+              <p className="text-xs text-slate-500 mt-1">Find answers & guides</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center">
+              <HelpCircle size={20} className="text-primary-600" />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Leads Banner */}

@@ -38,6 +38,7 @@ export interface Institute {
   createdAt: string;
   updatedAt: string;
   createdBy: string;
+  starredMediaUrls?: string[];
 }
 
 /**

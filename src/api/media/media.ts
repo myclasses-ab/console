@@ -4,13 +4,14 @@
  */
 
 import axios from '../axios-helper';
-import type { Media, MediaEntityType, MediaType } from '@/types';
+import type { Media } from '@/types';
+import { MediaEntityType, MediaType } from '@/types/enums';
 
 export const mediaApi = {
   /**
    * Create a new media entry
    */
-  create: async (media: Omit<Media, 'identifier'>): Promise<Media> => {
+  create: async (media: Omit<Media, 'createdAt'>): Promise<Media> => {
     const response = await axios.post<Media>('/media', media);
     return response.data;
   },
