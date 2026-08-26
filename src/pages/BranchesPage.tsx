@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useInstitute } from '@/context/InstituteContext';
 import { branchApi } from '@/api';
@@ -6,8 +6,7 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import MobileListCard from '@/components/shared/MobileListCard';
-import { Plus, Pencil, Trash2, MapPin, Star, X, ArrowRight } from 'lucide-react';
-import { CITIES } from '@/components/helper/cities';
+import { Plus, Pencil, Trash2, MapPin, Star, ArrowRight } from 'lucide-react';
 import type { Branch } from '@/types';
 import { toast } from 'sonner';
 
@@ -38,7 +37,6 @@ const emptyBranch: Partial<Branch> = {
   address: '',
   landmark: '',
   cityName: '',
-  serviceCities: [],
   state: '',
   pincode: '',
   latitude: '',
@@ -62,9 +60,6 @@ export default function BranchesPage() {
   const [editingBranch, setEditingBranch] = useState<Partial<Branch> | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Branch | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [cityInput, setCityInput] = useState('');
-  const [showCitySuggestions, setShowCitySuggestions] = useState(false);
-  const cityInputRef = useRef<HTMLInputElement>(null);
 
   const loadBranches = async () => {
     if (!institute?.identifier) {
@@ -88,21 +83,11 @@ export default function BranchesPage() {
 
   const openAdd = () => {
     setEditingBranch({ ...emptyBranch, instituteIdentifier: institute?.identifier || '' });
-    setCityInput('');
-    setShowCitySuggestions(false);
     setModalOpen(true);
   };
 
   const openEdit = (branch: Branch) => {
-    const serviceCities =
-      branch.serviceCities && branch.serviceCities.length > 0
-        ? [...branch.serviceCities]
-        : branch.cityName
-          ? [branch.cityName]
-          : [];
-    setEditingBranch({ ...branch, serviceCities });
-    setCityInput('');
-    setShowCitySuggestions(false);
+    setEditingBranch({ ...branch });
     setModalOpen(true);
   };
 
@@ -147,60 +132,9 @@ export default function BranchesPage() {
     setEditingBranch((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
-  const getServiceCities = () => editingBranch?.serviceCities || [];
-
-  const setPrimaryCity = (value: string) => {
-    const current = getServiceCities();
-    const trimmed = value.trim();
-    const additional = current.slice(1);
-    // Remove the new primary from additional cities to avoid duplication
-    const filtered = additional.filter((c) => c.toLowerCase() !== trimmed.toLowerCase());
-    const next = trimmed ? [trimmed, ...filtered] : [...filtered];
-    setEditingBranch((prev) => (prev ? { ...prev, serviceCities: next, cityName: trimmed || prev.cityName } : null));
+  const setCityName = (value: string) => {
+    setEditingBranch((prev) => (prev ? { ...prev, cityName: value.trim() } : null));
   };
-
-  const addServiceCity = (name: string) => {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    const current = getServiceCities();
-    if (current.some((c) => c.toLowerCase() === trimmed.toLowerCase())) return;
-    setEditingBranch((prev) => (prev ? { ...prev, serviceCities: [...current, trimmed] } : null));
-  };
-
-  const removeServiceCity = (index: number) => {
-    const current = getServiceCities();
-    if (index < 0 || index >= current.length) return;
-    const next = [...current];
-    next.splice(index, 1);
-    setEditingBranch((prev) =>
-      prev
-        ? {
-            ...prev,
-            serviceCities: next,
-            cityName: next[0] || prev.cityName || '',
-          }
-        : null
-    );
-  };
-
-  const handleCityInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      if (cityInput.trim()) {
-        addServiceCity(cityInput);
-        setCityInput('');
-        setShowCitySuggestions(false);
-      }
-    }
-  };
-
-  const citySuggestions = cityInput.trim()
-    ? CITIES.filter(
-        (c) =>
-          c.toLowerCase().includes(cityInput.trim().toLowerCase()) &&
-          !getServiceCities().some((existing) => existing.toLowerCase() === c.toLowerCase())
-      ).slice(0, 6)
-    : [];
 
   if (isLoading) {
     return (
@@ -265,18 +199,7 @@ export default function BranchesPage() {
                       </div>
                     </td>
                     <td className="px-5 py-3 text-slate-600">
-                      {branch.serviceCities && branch.serviceCities.length > 0 ? (
-                        <div className="flex flex-wrap items-center gap-1">
-                          <span>{toTitleCase(branch.serviceCities[0])}</span>
-                          {branch.serviceCities.length > 1 && (
-                            <span className="text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
-                              +{branch.serviceCities.length - 1} more
-                            </span>
-                          )}
-                        </div>
-                      ) : (
-                        toTitleCase(branch.cityName) || '-'
-                      )}
+                      {toTitleCase(branch.cityName) || '-'}
                     </td>
                     <td className="px-5 py-3 text-slate-600 max-w-xs truncate">{branch.address}</td>
                     <td className="px-5 py-3">
@@ -317,9 +240,7 @@ export default function BranchesPage() {
                   <div className="space-y-0.5">
                     <div>{branch.address}</div>
                     <div className="text-xs text-slate-500">
-                      {branch.serviceCities && branch.serviceCities.length > 0
-                        ? `${toTitleCase(branch.serviceCities[0])}${branch.serviceCities.length > 1 ? ` +${branch.serviceCities.length - 1}` : ''}`
-                        : toTitleCase(branch.cityName) || '-'}
+                      {toTitleCase(branch.cityName) || '-'}
                     </div>
                   </div>
                 }
@@ -392,77 +313,14 @@ export default function BranchesPage() {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Primary City <span className="text-red-500">*</span>
+                  City <span className="text-red-500">*</span>
                 </label>
                 <input
-                  value={editingBranch.serviceCities?.[0] || editingBranch.cityName || ''}
-                  onChange={(e) => setPrimaryCity(e.target.value)}
+                  value={editingBranch.cityName || ''}
+                  onChange={(e) => setCityName(e.target.value)}
                   placeholder="Main branch city"
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                  Additional Service Cities
-                </label>
-                <div className="relative">
-                  <div className="min-h-[3rem] w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus-within:ring-2 focus-within:ring-primary-500 flex flex-wrap items-center gap-2">
-                    {getServiceCities()
-                      .slice(1)
-                      .map((city, idx) => (
-                        <span
-                          key={`${city}-${idx}`}
-                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-primary-50 text-primary-700 text-sm"
-                        >
-                          {city}
-                          <button
-                            type="button"
-                            onClick={() => removeServiceCity(idx + 1)}
-                            className="p-0.5 hover:bg-primary-100 rounded-full"
-                            aria-label={`Remove ${city}`}
-                          >
-                            <X size={12} />
-                          </button>
-                        </span>
-                      ))}
-                    <input
-                      ref={cityInputRef}
-                      type="text"
-                      value={cityInput}
-                      onChange={(e) => {
-                        setCityInput(e.target.value);
-                        setShowCitySuggestions(true);
-                      }}
-                      onFocus={() => setShowCitySuggestions(true)}
-                      onKeyDown={handleCityInputKeyDown}
-                      placeholder={getServiceCities().length > 1 ? 'Add another city' : 'Type and press Enter to add cities'}
-                      className="flex-1 min-w-[140px] bg-transparent outline-none text-sm py-1"
-                    />
-                  </div>
-                  {showCitySuggestions && citySuggestions.length > 0 && (
-                    <div className="absolute left-0 right-0 top-full mt-1 bg-white rounded-xl shadow-xl border border-slate-200 z-50 max-h-48 overflow-y-auto">
-                      {citySuggestions.map((city) => (
-                        <button
-                          key={city}
-                          type="button"
-                          onClick={() => {
-                            addServiceCity(city);
-                            setCityInput('');
-                            setShowCitySuggestions(false);
-                            cityInputRef.current?.focus();
-                          }}
-                          className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 first:rounded-t-xl last:rounded-b-xl"
-                        >
-                          {city}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <p className="text-xs text-slate-500 mt-1.5">
-                  Add nearby or target cities where this branch can reach students.
-                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1.5">State</label>

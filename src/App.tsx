@@ -24,6 +24,7 @@ import MediaPage from '@/pages/MediaPage';
 import SubscriptionPage from '@/pages/SubscriptionPage';
 import SettingsPage from '@/pages/SettingsPage';
 import CreditsPage from '@/pages/CreditsPage';
+import LocationDemoPage from '@/pages/LocationDemoPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -49,6 +50,7 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/demo/location" element={<LocationDemoPage />} />
       <Route
         path="/"
         element={

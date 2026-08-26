@@ -459,23 +459,8 @@ function InstituteBranches({ branches }: { branches: Branch[] }) {
                   <div className="flex flex-wrap items-center gap-2">
                     <MapPin className="w-3.5 h-3.5 text-slate-500" />
                     <span className="text-sm text-slate-600">
-                      {(branch.serviceCities && branch.serviceCities.length > 0
-                        ? branch.serviceCities[0]
-                        : branch.cityName) || '-'}
-                      , {branch.state}
+                      {branch.cityName || '-'}, {branch.state}
                     </span>
-                    {branch.serviceCities && branch.serviceCities.length > 1 && (
-                      <>
-                        {branch.serviceCities.slice(1).map((city) => (
-                          <span
-                            key={city}
-                            className="inline-flex items-center px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs"
-                          >
-                            {city}
-                          </span>
-                        ))}
-                      </>
-                    )}
                   </div>
                 </div>
               </div>
@@ -505,10 +490,7 @@ function InstituteBranches({ branches }: { branches: Branch[] }) {
                     <p className="text-sm text-slate-500 mt-1">Landmark: {branch.landmark}</p>
                   )}
                   <p className="text-slate-700 mt-2">
-                    {(branch.serviceCities && branch.serviceCities.length > 0
-                      ? branch.serviceCities[0]
-                      : branch.cityName) || '-'}
-                    , {branch.state} - {branch.pincode}
+                    {branch.cityName || '-'}, {branch.state} - {branch.pincode}
                   </p>
                 </div>
               </div>
