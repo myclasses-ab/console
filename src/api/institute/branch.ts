@@ -78,4 +78,12 @@ export const branchApi = {
     const response = await axios.put<Branch>(`/branches/${identifier}`, data);
     return response.data;
   },
+
+  /**
+   * Re-fetch the Google rating for a branch from its Google Maps URL
+   */
+  refreshGoogleRating: async (identifier: string): Promise<Branch> => {
+    const response = await axios.post<Branch>(`/branches/${identifier}/google-rating/refresh`);
+    return response.data;
+  },
 };

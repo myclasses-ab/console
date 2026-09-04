@@ -6,7 +6,7 @@ import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import MobileListCard from '@/components/shared/MobileListCard';
-import { Plus, Pencil, Trash2, MapPin, Star, ArrowRight } from 'lucide-react';
+import { Plus, Pencil, Trash2, MapPin, Star, ArrowRight, RefreshCw } from 'lucide-react';
 import type { Branch } from '@/types';
 import { toast } from 'sonner';
 
@@ -60,6 +60,7 @@ export default function BranchesPage() {
   const [editingBranch, setEditingBranch] = useState<Partial<Branch> | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<Branch | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [refreshingRatingId, setRefreshingRatingId] = useState<string | null>(null);
 
   const loadBranches = async () => {
     if (!institute?.identifier) {
@@ -125,6 +126,25 @@ export default function BranchesPage() {
       setDeleteConfirm(null);
     } catch (err) {
       toast.error('Failed to delete');
+    }
+  };
+
+  const handleRefreshGoogleRating = async (branch: Branch) => {
+    setRefreshingRatingId(branch.identifier);
+    try {
+      const updated = await branchApi.refreshGoogleRating(branch.identifier);
+      setBranches((prev) => prev.map((b) => (b.identifier === updated.identifier ? updated : b)));
+      const rating = updated.googleRating != null ? Number(updated.googleRating).toFixed(1) : null;
+      toast.success(
+        rating
+          ? `Google rating updated: ${rating} (${updated.googleRatingCount ?? 0} reviews)`
+          : 'Google rating updated'
+      );
+    } catch (err: any) {
+      const message = err?.response?.data;
+      toast.error(typeof message === 'string' && message ? message : 'Failed to update Google rating');
+    } finally {
+      setRefreshingRatingId(null);
     }
   };
 
@@ -197,6 +217,13 @@ export default function BranchesPage() {
                         {toTitleCase(branch.name)}
                         {branch.isMainBranch && <Star size={14} className="text-amber-500 fill-amber-500" />}
                       </div>
+                      {branch.googleRating != null && (
+                        <div className="flex items-center gap-1 mt-0.5 text-xs font-normal text-slate-500">
+                          <Star size={12} className="text-amber-500 fill-amber-500" />
+                          {Number(branch.googleRating).toFixed(1)} on Google
+                          {branch.googleRatingCount != null && ` (${branch.googleRatingCount})`}
+                        </div>
+                      )}
                     </td>
                     <td className="px-5 py-3 text-slate-600">
                       {toTitleCase(branch.cityName) || '-'}
@@ -211,6 +238,14 @@ export default function BranchesPage() {
                     </td>
                     <td className="px-5 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleRefreshGoogleRating(branch)}
+                          disabled={refreshingRatingId === branch.identifier}
+                          title="Update Google rating"
+                          className="p-1.5 rounded-lg hover:bg-amber-50 text-amber-500 disabled:opacity-50"
+                        >
+                          <RefreshCw size={16} className={refreshingRatingId === branch.identifier ? 'animate-spin' : ''} />
+                        </button>
                         <button
                           onClick={() => openEdit(branch)}
                           className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500"
@@ -242,6 +277,13 @@ export default function BranchesPage() {
                     <div className="text-xs text-slate-500">
                       {toTitleCase(branch.cityName) || '-'}
                     </div>
+                    {branch.googleRating != null && (
+                      <div className="flex items-center gap-1 text-xs text-slate-500">
+                        <Star size={12} className="text-amber-500 fill-amber-500" />
+                        {Number(branch.googleRating).toFixed(1)} on Google
+                        {branch.googleRatingCount != null && ` (${branch.googleRatingCount})`}
+                      </div>
+                    )}
                   </div>
                 }
                 badge={
@@ -251,6 +293,14 @@ export default function BranchesPage() {
                 }
                 actions={
                   <>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); handleRefreshGoogleRating(branch); }}
+                      disabled={refreshingRatingId === branch.identifier}
+                      className="p-2 rounded-lg hover:bg-amber-50 text-amber-500 disabled:opacity-50"
+                      aria-label="Update Google rating"
+                    >
+                      <RefreshCw size={16} className={refreshingRatingId === branch.identifier ? 'animate-spin' : ''} />
+                    </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); openEdit(branch); }}
                       className="p-2 rounded-lg hover:bg-slate-100 text-slate-500"
@@ -372,6 +422,21 @@ export default function BranchesPage() {
                   placeholder="https://maps.google.com/?q=19.2307,72.8567"
                   className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
+                {editingBranch.identifier && (
+                  <div className="mt-1.5 text-xs text-slate-500">
+                    {editingBranch.googleRating != null ? (
+                      <span className="inline-flex items-center gap-1">
+                        <Star size={12} className="text-amber-500 fill-amber-500" />
+                        Google rating: {Number(editingBranch.googleRating).toFixed(1)}
+                        {editingBranch.googleRatingCount != null && ` (${editingBranch.googleRatingCount} reviews)`}
+                        {editingBranch.googleRatingUpdatedAt &&
+                          ` · updated ${new Date(editingBranch.googleRatingUpdatedAt).toLocaleDateString()}`}
+                      </span>
+                    ) : (
+                      'Google rating not fetched yet — it will be fetched automatically on save.'
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="md:col-span-2 flex items-center gap-6">

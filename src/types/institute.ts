@@ -59,6 +59,10 @@ export interface Branch {
   latitude: number | string;
   longitude: number | string;
   googleMapsUrl: string;
+  googlePlaceId?: string | null;
+  googleRating?: number | string | null;
+  googleRatingCount?: number | null;
+  googleRatingUpdatedAt?: string | null;
   phone: string;
   email: string;
   operatingHoursStart: string;
